@@ -13,6 +13,7 @@ COPY prompts/product-assistant-system-v14.md ./prompts/product-assistant-system-
 COPY prompts/product-assistant-system-v15.md ./prompts/product-assistant-system-v15.md
 COPY prompts/product-assistant-system-v16.md ./prompts/product-assistant-system-v16.md
 COPY prompts/product-assistant-system-v17.md ./prompts/product-assistant-system-v17.md
+COPY prompts/product-assistant-system-v18.md ./prompts/product-assistant-system-v18.md
 COPY scripts/backup_journal.py ./scripts/backup_journal.py
 RUN chown -R 10001:10001 /app
 

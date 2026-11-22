@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.assistant import AssistantService, QuestionRejected, load_system_prompt
 from app.catalog import OpenCartCatalog, create_mysql_connection
 from app.config import Settings
+from app.conversation import ConversationMessage, MAX_PRIOR_MESSAGES
 from app.journal import Journal, JournalAttempt
 from app.openai_client import OpenAIResponsesClient
 from app.product_context import LanguageCard, Product, html_to_safe_text
@@ -49,6 +50,9 @@ class AskRequest(BaseModel):
     article: str = Field(min_length=1, max_length=128)
     product_id: int
     question: str = Field(min_length=1, max_length=2000)
+    history: list[ConversationMessage] = Field(
+        default_factory=list, max_length=MAX_PRIOR_MESSAGES
+    )
 
 
 class VersionedAskRequest(BaseModel):
@@ -56,6 +60,9 @@ class VersionedAskRequest(BaseModel):
 
     article: str = Field(min_length=1, max_length=128)
     question: str = Field(min_length=1, max_length=2000)
+    history: list[ConversationMessage] = Field(
+        default_factory=list, max_length=MAX_PRIOR_MESSAGES
+    )
 
 
 class AskResponse(BaseModel):
@@ -262,6 +269,7 @@ def create_app(
             attempt = active["assistant"].submit(
                 product,
                 payload.question,
+                history=payload.history,
                 request_started_at=request_started_at,
             )
         except QuestionRejected as error:
@@ -325,6 +333,7 @@ def create_app(
             attempt = active["assistant"].submit(
                 products[0],
                 question,
+                history=payload.history,
                 request_started_at=request_started_at,
             )
         except QuestionRejected as error:

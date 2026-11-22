@@ -6,8 +6,10 @@ import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from collections.abc import Sequence
 from typing import Callable
 
+from app.conversation import ConversationMessage
 from app.journal import Journal, JournalAttempt
 from app.openai_client import (
     AssistantDecision,
@@ -31,7 +33,8 @@ EXPECTED_PROMPT_SHA256_V14 = "c78822fcec4d4148099dbce6a8fce54c447750594f65f3d3ef
 EXPECTED_PROMPT_SHA256_V15 = "d9260562fd9bf5998c93aebbaaa2bd6ba13e93c3f716d82b1c3d8aad3106058f"
 EXPECTED_PROMPT_SHA256_V16 = "2789348950c64432833f678cd1b83db06fc46f5363e40a7356d83f43bf35c876"
 EXPECTED_PROMPT_SHA256_V17 = "f26e6eabf5d2867adf5608843abb1da277c362759cd3606d892c3c101e9fcdea"
-DEFAULT_PROMPT_VERSION = "v17"
+EXPECTED_PROMPT_SHA256_V18 = "87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f"
+DEFAULT_PROMPT_VERSION = "v18"
 PROMPT_PATHS = {
     "v12": Path(__file__).parents[1] / "prompts" / "product-assistant-system-v12.md",
     "v13": Path(__file__).parents[1] / "prompts" / "product-assistant-system-v13.md",
@@ -39,6 +42,7 @@ PROMPT_PATHS = {
     "v15": Path(__file__).parents[1] / "prompts" / "product-assistant-system-v15.md",
     "v16": Path(__file__).parents[1] / "prompts" / "product-assistant-system-v16.md",
     "v17": Path(__file__).parents[1] / "prompts" / "product-assistant-system-v17.md",
+    "v18": Path(__file__).parents[1] / "prompts" / "product-assistant-system-v18.md",
 }
 EXPECTED_PROMPT_HASHES = {
     "v12": EXPECTED_PROMPT_SHA256_V12,
@@ -47,6 +51,7 @@ EXPECTED_PROMPT_HASHES = {
     "v15": EXPECTED_PROMPT_SHA256_V15,
     "v16": EXPECTED_PROMPT_SHA256_V16,
     "v17": EXPECTED_PROMPT_SHA256_V17,
+    "v18": EXPECTED_PROMPT_SHA256_V18,
 }
 HEALTH_DISCLAIMER = (
     "Це відповідь штучного інтелекту; інформацію щодо здоров’я потрібно перевірити з фахівцем."
@@ -81,6 +86,7 @@ _PERSONAL_HEALTH_CONTEXT_RE = re.compile(
     r"діабет\w*|диабет\w*|diabet(?:es|ic)|"
     r"нирк\w*\s+(?:недостат|хвороб|захворюван)|kidney\s+(?:disease|condition|failure)|"
     r"хвороб\w*|захворюван\w*|заболеван\w*|condition|disease|illness|"
+    r"астм\w*|asthma\w*|"
     r"лікарськ\w*\s+препарат\w*|ліки|медикамент\w*|лекарств\w*|medication|prescription|drug\s+interaction\w*|"
     r"стан\w*\s+здоров|health\s+(?:condition|issue)|"
     r"дитин\w*|ребен\w*|підлітк\w*|подрост\w*|child(?:ren)?|teen(?:ager)?|minor|under\s+18"
@@ -93,6 +99,14 @@ _PERSONALIZED_DOSE_RE = re.compile(
     r"\b(?:my|for\s+me|should\s+i|can\s+i|do\s+i)\b.{0,50}\b(?:dose|dosage|take|use)\b|"
     r"\b(?:індивідуальн\w*|особист\w*)\s+доз\w*\b"
     r")"
+)
+_PERSONAL_SAFETY_FOLLOWUP_RE = re.compile(
+    r"(?ix)\b(?:"
+    r"безпечн\w*|безопасн\w*|safe(?:ty)?|risk\w*|ризик\w*|"
+    r"(?:чи|а\s+чи)\s+(?:можу|можна|підход\w*|сумісн\w*)|"
+    r"(?:можна|можу)\s+мені|"
+    r"can\s+i|may\s+i|should\s+i"
+    r")\b"
 )
 URL_OR_DOMAIN_RE = re.compile(
     r"(?:https?://|www\.)\S+|\b(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/\S*)?",
@@ -139,6 +153,7 @@ class AssistantService:
         product: Product | None,
         question: str,
         *,
+        history: Sequence[ConversationMessage] = (),
         request_started_at: float | None = None,
     ) -> JournalAttempt:
         if product is None:
@@ -181,7 +196,7 @@ class AssistantService:
                 self.journal.complete_attempt(attempt.attempt_id, OUT_OF_SCOPE_ANSWER)
                 return self.journal.get_attempt(attempt.attempt_id)
 
-            if _is_personal_health_request(question):
+            if _is_personal_health_request(question, history):
                 self.journal.update_search_metadata(
                     attempt.attempt_id,
                     status="skipped",
@@ -202,6 +217,7 @@ class AssistantService:
                 instructions=self.system_prompt,
                 product_context=product_context,
                 question=question,
+                history=history,
             )
             if not isinstance(decision, AssistantDecision):
                 raise ProviderError("provider_invalid_response")
@@ -272,6 +288,7 @@ class AssistantService:
                     product_context=product_context,
                     question=question,
                     evidence=evidence_text,
+                    history=history,
                 )
                 if not isinstance(final, StructuredAnswer):
                     raise ProviderError("provider_invalid_response")
@@ -363,8 +380,22 @@ class AssistantService:
         )
 
 
-def _is_personal_health_request(question: str) -> bool:
+def _is_personal_health_request(
+    question: str,
+    history: Sequence[ConversationMessage] = (),
+) -> bool:
+    if _PERSONAL_HEALTH_CONTEXT_RE.search(question) or _PERSONALIZED_DOSE_RE.search(
+        question
+    ):
+        return True
+
+    prior_user_context = " ".join(
+        message.content for message in history if message.role == "user"
+    )
     return bool(
-        _PERSONAL_HEALTH_CONTEXT_RE.search(question)
-        or _PERSONALIZED_DOSE_RE.search(question)
+        _PERSONAL_HEALTH_CONTEXT_RE.search(prior_user_context)
+        and (
+            _PERSONALIZED_DOSE_RE.search(question)
+            or _PERSONAL_SAFETY_FOLLOWUP_RE.search(question)
+        )
     )

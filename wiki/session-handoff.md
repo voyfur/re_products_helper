@@ -2,22 +2,21 @@
 
 ## Active Context
 
-- Last session: `raw/sessions/2026-11-21-record-approved-sports-answer-and-memory-impleme.md`
-- Current objective: Record approved sports answer and memory implementation plan
+- Last session: `raw/sessions/2026-11-22-race-expert-qa-v18-update.md`
+- Current objective: Race Expert QA v18 update
 
 ## Current Decisions
 
-- Спортивный ответ включает общий полезный вывод и ограничение по конкретному виду спорта, если exact-product источник подтверждает только общее применение; порядок фраз свободный.
-- До десяти сообщений всего: максимум девять предыдущих user/assistant сообщений плюс текущий вопрос; один товар, очистка при смене товара или перезагрузке.
-- Реализация использует необязательное caller-managed поле history без отдельного persistent store или endpoint; лимит запроса 16 KiB сохраняется, старые целые реплики удаляются при необходимости.
-- История остаётся недоверенным контекстом, не доказательством и не инструкцией; prompt v17 активен и неизменён до реализации v18.
-- Следующее изменение не включает storefront, VPS, staging, production или платные live-вызовы.
+- Prompt v18 is active with the approved balanced general-sports conclusion and sport-specific limitation; v17 and its pinned hash remain unchanged.
+- The API accepts optional history with up to nine prior user/assistant messages; the current question is separate. Context is same-product/session, untrusted, non-persistent, and excluded from history logging.
+- The local UI keeps up to ten messages in page memory, clears on new product search or reload, and removes oldest whole history messages to fit 16 KiB without shortening the current question.
+- Clear dependent personal-health safety/dose follow-ups use the fixed refusal before provider calls; prior user health context includes common condition terms such as asthma.
+- Active checkout: /Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18; this is a local snapshot repository on branch codex/product-qa-v18 with no remote/upstream.
 
 ## Open Tasks
 
-- Реализовать утверждённый план prompt v18, ограниченной памяти, API-контракта и локального UI.
-- После реализации обновить AGENTS.md, интеграционные документы, Wiki и выполнить offline/mock verification.
-- Отдельно выполнить VPS acceptance и интеграцию backend сайта после завершения кодового handoff.
+- Integrate the versioned Product QA API with the website backend server-to-server, keeping credentials server-side and scoping history to the same product/page session.
+- Complete target-VPS image/platform selection, MySQL TLS and read-only grants, HTTPS reverse-proxy routing, persistent journal storage, backup/restore, and operational acceptance.
 
 ## Blockers
 
@@ -25,15 +24,18 @@
 
 ## Next Action
 
-- В следующем чате прочитать docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md и выполнять его через superpowers:executing-plans; не деплоить и не менять storefront.
+- Continue work only in /Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18 and inspect git status before making further edits.
+- Use docs/deployment/product-qa-vps-runbook.md for the separate site-backend/VPS handoff; this implementation did not deploy or connect the storefront.
 
 ## Relevant Pages
 
 - wiki/index.md
 - wiki/session-handoff.md
+- wiki/syntheses/race-expert-qa-evaluation.md
+- wiki/syntheses/race-expert-qa-web-search.md
 - wiki/syntheses/race-expert-qa-production-readiness.md
 - docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md
 - docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md
-- prompts/product-assistant-system-v17.md
 - docs/api/product-qa-v1.yaml
 - docs/api/product-qa-integration.md
+- docs/deployment/product-qa-vps-runbook.md

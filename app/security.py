@@ -13,7 +13,7 @@ class AskBodySizeLimit:
         if not (
             scope.get("type") == "http"
             and scope.get("method") == "POST"
-            and scope.get("path") == "/api/v1/ask"
+            and scope.get("path") in {"/api/ask", "/api/v1/ask"}
         ):
             await self.app(scope, receive, send)
             return

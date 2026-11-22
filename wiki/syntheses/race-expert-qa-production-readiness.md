@@ -3,10 +3,10 @@ schema_version: 2
 id: "synthesis.race-expert-qa-production-readiness"
 type: "synthesis"
 title: "Подготовка Product QA Race Expert к production"
-description: "Проверенное текущее состояние backend после live E2E; утверждённый кодовый handoff v18/памяти и отдельные VPS production-блокеры."
+description: "Проверенное состояние Product QA v18 после offline/mock verification и отдельные незакрытые требования site-backend и VPS acceptance."
 tags: ["project:race-expert", "capability:product-qa", "workflow:deployment", "topic:production-readiness", "platform:raceexpert.com.ua"]
 source: {"raw_path": "docs/test-harness/qa-live-50-products-500-questions-2026-11-20.md"}
-dates: {"added_at": "2026-11-21T17:24:20+02:00", "updated_at": "2026-11-21T22:16:00+02:00"}
+dates: {"added_at": "2026-11-21T17:24:20+02:00", "updated_at": "2026-11-22T16:38:38+02:00"}
 relations: [{"type": "references", "target": "synthesis.race-expert-qa-evaluation"}, {"type": "references", "target": "synthesis.race-expert-qa-web-search"}, {"type": "references", "target": "project.race-expert-qa"}]
 aliases: ["Product QA production readiness", "Продакшн-готовность Q&A"]
 status: "active"
@@ -18,7 +18,7 @@ status: "active"
 
 Backend прошёл локальный 500-сценарный E2E после восстановления SSH-туннеля и offline-набор после адаптации. Live UI E2E на v16 подтвердил запуск Tavily, но ответ был слишком осторожным. После изменения prompt выполнен успешный live UI E2E на v17: каталог повторно подтвердил товар, Tavily вызвался, источник прошёл точный фильтр, OpenAI завершил ответ HTTP 200. Ответ дал прямой общий вывод о спортивном применении без упоминания внутренней карточки или наличия и без заявления о специальной формуле для плавцов. Время полного ответа — 10,759 ms. Локальный интерфейс оставлен открытым на `http://127.0.0.1:8787/`; база доступна через одобренный локальный SSH-туннель. Storefront Raceexpert.com.ua не подключался; staging и production deploy не выполнялись.
 
-Утверждены [спецификация спортивной пригодности и памяти диалога](../../docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md) и [план обновления проекта](../../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md). Следующий рабочий шаг — реализация v18 и временного контекста в коде и API-контракте. Этот handoff не просит выполнять VPS deployment или менять storefront.
+Утверждённые [спецификация спортивной пригодности и памяти диалога](../../docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md) и [план обновления проекта](../../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md) реализованы в локальном Git checkout. Активен prompt v18; изменения прошли offline и mock verification. Следующий отдельный этап — server-side интеграция сайта и VPS acceptance по runbook; этот статус не означает, что эти работы выполнены или storefront подключён.
 
 ## Проверенные результаты
 
@@ -26,13 +26,18 @@ Backend прошёл локальный 500-сценарный E2E после в
 - Tavily вызван 217 раз, 0 ошибок провайдера; в 5 финальных попытках были приняты записи по имени товара, только для RE89157. Ни одна запись не подтвердила запрошенный exact-вкус/объём/фасовку. Остальные поиски не дали положительного exact-variant факта.
 - 283 финальных попытки имели `search_status=skipped`, то есть Tavily не вызывался. Не считать эти пропуски автоматом корректными: при дальнейшем аудите классифицировать каждый важный сценарий по решению маршрутизации и вопросу. Поиск по одобренному источнику должен запускаться только когда карточки недостаточно или запрошены допустимые темы отзывов.
 - Отчёт выявил 21/50 общих ответов на явно нерелевантные вопросы и 41/50 ответов с количеством/инструкцией из карточки в personal-health сценариях.
-- План адаптации v14 остаётся в силе: fail-closed `product_related`; фиксированный отказ на личные health/dose вопросы без повторения порций; `verified_product_name` передаётся модели только после точной серверной фильтрации; `/ready` делает read-only `SELECT 1`, а `/health` остаётся liveness. Активный prompt v17 отделяет вопрос о спортивном применении от персональной медицинской рекомендации, запускает точный поиск по производителю при нехватке данных, позволяет ответить на уровне общего спортивного использования и убирает ссылки на внутреннюю карточку и незапрошенное наличие.
-- Полный offline-набор v17: 171 тест и 4009 subtests passed. Отдельный mock container smoke на `linux/arm64` проверил hashes v12–v17 и `/health`, `/ready`, `/api/v1/ask`.
+- План адаптации v14 остаётся в силе: fail-closed `product_related`; фиксированный отказ на личные health/dose вопросы без повторения порций; `verified_product_name` передаётся модели только после точной серверной фильтрации; `/ready` делает read-only `SELECT 1`, а `/health` остаётся liveness. Prompt v18 добавляет совместный общий спортивный вывод и ограничение по названному спорту, сохраняя эти guardrails.
+- Исторический offline-набор v17: 171 тест и 4009 subtests passed. Для v18 выполнен новый offline-набор (результат выше); текущая browser/container smoke использовала локальные mock данные, а не live providers.
 - Один live UI E2E на v17: последняя попытка имеет `status=succeeded`, модель `gpt-6-luna`, `prompt_version=v17`, `search_status=used`, `search_provider=tavily`; источник прошёл exact-match фильтр. Поиск занял 488 ms, полный ответ — 10,759 ms. Buyer-facing результат показан в интерфейсе; вопрос, ответ и source provenance в Wiki не копировались.
 - Один live local E2E запрос после v14: article `RE89157` разрешился по каталогу; `/api/ask` вернул HTTP 200 и `succeeded`; `search_status=used`; точная запись производителя принята; поиск занял 849 ms, полный запрос 11,811 ms. Финальный ответ не содержал запрошенное число порций и сообщил, что факт не подтверждён доступным evidence. Ответ/запрос и source metadata не скопированы в логи или Wiki; сохранён только штатный SQLite журнал.
+- Prompt v18 активен с SHA-256 `87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f`; prompt v17 по-прежнему имеет SHA-256 `f26e6eabf5d2867adf5608843abb1da277c362759cd3606d892c3c101e9fcdea` и не изменён.
+- API принимает необязательные 0–9 предыдущих `user`/`assistant` реплик; история не является источником фактов или инструкций, не логируется и не сохраняется. UI держит до 10 сообщений в памяти текущей страницы, сбрасывает историю при новом поиске и reload, сокращает только самые старые целые реплики при 16 KiB, сохраняя текущий вопрос.
+- Offline проверки 22 ноября: focused pytest — 88 passed; полный suite — 195 passed и 4009 subtests. Prompt pins v12–v18 проверены. Локальный image `race-expert-product-qa:v18-check` собран; in-container smoke с `--network none` прошёл на synthetic dependencies, `/health`, `/ready`, `/api/v1/ask` ответили 200.
+- Browser acceptance для локального UI выполнена на временном localhost mock без OpenAI/Tavily: проверены передача 9 prior messages, 10-сообщный transcript, сброс при смене товара/reload, отсутствие добавления failed-ответа, UTF-8 pruning целых старых реплик и отображение HTML-похожего текста как текста.
+- Во время этого обновления не выполнялись live OpenAI/Tavily запросы, storefront/backend сайта не менялись, VPS/staging/production deployment не проводились.
 - Использовался local QA `/api/search` → `/api/ask` flow через `scripts/run_local_session.py`; это не live auth-check `/api/v1/ask`. Versioned endpoint ранее прошёл контейнерный mock smoke. Uvicorn access logging local launcher выключен для сессии.
-- Prompt v12–v16 сохранены без изменений. Активный v17 SHA-256: `f26e6eabf5d2867adf5608843abb1da277c362759cd3606d892c3c101e9fcdea`.
-- Production Dockerfile копирует v12–v17 и `scripts/backup_journal.py`; Uvicorn access log выключен. Локальный `race-expert-product-qa:v17-check` собран для `linux/arm64`, in-container mock smoke прошёл для prompt hashes и `/health`, `/ready`, `/api/v1/ask`. Архитектура VPS неизвестна, поэтому разработчик должен собрать образ для целевой архитектуры.
+- Prompt v12–v17 сохранены без изменений; active v18 hash приведён выше.
+- Production Dockerfile копирует v12–v18 и `scripts/backup_journal.py`; Uvicorn access log выключен. Локальный `race-expert-product-qa:v18-check` прошёл mock smoke без сети. Архитектура целевого VPS неизвестна, поэтому оператор/разработчик должен собрать образ для нужной platform.
 - Добавлены черновые production-конфигурации и handoff: [`compose.production.yaml`](../../deploy/compose.production.yaml), [`nginx-race-expert-qa.conf.example`](../../deploy/nginx-race-expert-qa.conf.example), [production blueprint](../../docs/deployment/product-qa-production-blueprint.md). Compose config прошёл YAML/compose parsing; Nginx binary в окружении отсутствует, поэтому пример Nginx не прошёл `nginx -t`.
 - Backup utility проверен на disposable Linux tmpfs: создаёт SQLite online backup с mode `0600`, содержимое таблиц совпало. Restore drill и тест на постоянном VPS volume не проводились.
 - В live-запросе v16 точная страница производителя прошла matcher, но buyer-facing ответ остался слишком осторожным. Внешние данные поддерживают общий вывод о применении продукта в спортивном контексте, но не о специальной разработке для плавцов и не о персональной медицинской безопасности. Из-за противоречия числовых данных между источником и карточкой количество белка и другие такие числа в ответ не включаются.
@@ -75,28 +80,6 @@ Backend прошёл локальный 500-сценарный E2E после в
 
 До закрытия этих пунктов система не должна называться production-ready. Подготовка backend к передаче разработчику не означает подключение storefront или разрешение на deploy.
 
-## Сообщение для следующего чата
+## Следующий рабочий этап
 
-Скопируй этот блок в следующий чат для реализации утверждённой спецификации:
-
-```text
-Обнови Race Expert Product QA по утверждённой спецификации и плану реализации:
-- docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md
-- docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md
-
-Перед работой прочитай AGENTS.md, wiki/index.md, wiki/session-handoff.md, эту production-readiness страницу, prompt v17 и связанные API/assistant файлы. Используй superpowers:executing-plans и выполняй план по задачам; актуальный код сверяй с каждым указанным путём.
-
-Работай в Git checkout, предоставленном пользователем. Если текущая папка не содержит `.git`, сначала используй данный GitHub checkout и сверь в нём hash v17; не выдумывай remote и не перезаписывай пользовательские изменения.
-
-Сейчас активен prompt v17 с SHA-256 f26e6eabf5d2867adf5608843abb1da277c362759cd3606d892c3c101e9fcdea. Сохрани v17 и прежние версии без изменений; добавь новый v18 и активируй его только после обновления pin, журнала, Dockerfile и container smoke.
-
-Обязательное поведение v18: если точный источник производителя или одобренного поставщика подтверждает общее применение для активных спортсменов/после тренировки, но не подтверждает специальную формулу для конкретного спорта, дай обе части в одном коротком ответе: полезный общий вывод и аккуратное ограничение по виду спорта. Не отвечай только «не заявлено»; не утверждай личную безопасность, дозу, лечебный эффект или улучшение результата. Сохрани существующий поиск Tavily по точному товару и все прежние guardrails.
-
-Добавь временную память максимум из 10 последних сообщений всего: до 9 предыдущих user/assistant реплик плюс текущий вопрос. API получает предыдущие сообщения в необязательном поле history, старые клиенты без него продолжают работать. Не принимай system/developer роли. Тело запроса остаётся максимум 16 KiB: удаляй самые старые целые предыдущие сообщения до вхождения в лимит, текущий вопрос не сокращай. История относится только к одному выбранному товару; local UI сбрасывает её при смене товара и перезагрузке. Не добавляй persistent storage, endpoint чтения истории, отдельные логи истории или доверие к прежним ответам как к доказательствам. Product QA заново проверяет товар на каждом запросе. Учитывай релевантный prior health-контекст в зависимых follow-up и сохраняй фиксированный отказ без дозировки.
-
-Обнови API OpenAPI/integration docs, VPS runbook, AGENTS.md, README, локальный UI, offline regression tests, prompt hash loader, журнал версии, Dockerfile и smoke. После завершения обнови Wiki и session-handoff через штатный save_memory workflow. Не копируй покупательские вопросы/ответы, source URLs/provenance или секреты в Wiki.
-
-Граница этой задачи: код, API-контракт, локальный UI, документация и offline/mock verification. Не меняй отдельный storefront/backend сайта, не делай VPS/staging/production deployment и не запускай платные live OpenAI/Tavily запросы. Реальная интеграция endpoint сайта и установка на VPS остаются отдельным следующим шагом по docs/deployment/product-qa-vps-runbook.md. Не передавай разработчику provider, database, SSH или integration credentials.
-
-Проверь focused tests и полный pytest suite, hash неизменённого v17, новый v18 pin, API backward compatibility, memory reset/size behavior и container smoke без сети. В конце перечисли изменения, фактические результаты проверок и оставшуюся границу интеграции/production.
-```
+Кодовая часть готова, но backend сайта и storefront не подключены. Для отдельного handoff прочитать [VPS install runbook](../../docs/deployment/product-qa-vps-runbook.md) и настроить server-side вызов Product QA по HTTPS; integration key остаётся только в backend сайта. До рабочего трафика нужны image для целевой архитектуры, MySQL TLS/hostname verification и read-only grants, reverse-proxy route, постоянный защищённый SQLite volume, backup/restore и операционная acceptance. Checkout этой реализации находится по пути `/Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18`; это локальный snapshot без remote/upstream.

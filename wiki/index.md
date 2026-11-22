@@ -28,7 +28,7 @@
 - [Дизайн GPT-6 Luna](../docs/superpowers/specs/2026-11-11-gpt-6-luna-product-assistant-v8-design.md)
 - [Спецификация Web Search](../docs/superpowers/specs/2026-11-19-product-qa-web-search-design.md)
 - [Спортивная пригодность и память диалога](../docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md) — проект сбалансированного ответа и контекста из 10 сообщений.
-- [План обновления спортивного ответа и памяти](../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md) — утверждённая реализация prompt v18 и временной истории до 10 сообщений; код ещё не обновлён.
+- [План обновления спортивного ответа и памяти](../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md) — реализованы prompt v18, необязательная временная history и локальный UI; внешняя интеграция сайта и VPS acceptance остаются отдельными шагами.
 - [План реализации Web Search](../docs/superpowers/plans/2026-11-19-product-qa-web-search.md)
 - [План надёжности после live E2E](../docs/superpowers/plans/2026-11-20-product-qa-reliability-follow-up.md)
 - [Live E2E: 50 товаров × 10 вопросов](../docs/test-harness/qa-live-50-products-500-questions-2026-11-20.md)
@@ -36,7 +36,7 @@
 - [Реестр доменов Web Search](../docs/superpowers/research/2026-11-19-raceexpert-web-search-domain-research.md) — сводная рекомендация по категориям Race Expert, производителям, дистрибьюторам и площадкам отзывов.
 - Подробные исследования: [производители и дистрибьюторы](../docs/superpowers/research/2026-11-19-raceexpert-manufacturer-source-research.md), [площадки отзывов](../docs/superpowers/research/2026-11-19-raceexpert-product-review-platform-research.md)
 - Оценочные фикстуры и отчёты: [evals/](../evals/)
-- Активный prompt: [v17](../prompts/product-assistant-system-v17.md); v12–v16 сохранены без изменения как исторические версии.
+- Активный prompt: [v18](../prompts/product-assistant-system-v18.md); v17 и v12–v16 сохранены без изменений как исторические версии.
 
 ## Структура Wiki
 

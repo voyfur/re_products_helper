@@ -94,7 +94,7 @@ def test_old_attempts_migrate_and_search_metadata_excludes_evidence_text(tmp_pat
     assert old_attempt.prompt_version == "v12"
     assert old_attempt.search_status == "skipped"
     assert json.loads(old_attempt.source_metadata_json) == []
-    assert saved.prompt_version == "v17"
+    assert saved.prompt_version == "v18"
     assert saved.search_provider == "tavily"
     assert saved.search_latency_ms == 125
     assert saved.total_latency_ms == 840

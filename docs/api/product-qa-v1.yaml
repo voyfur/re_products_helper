@@ -26,7 +26,10 @@ paths:
         - productQaBearer: []
       requestBody:
         required: true
-        description: JSON request body must not exceed 16,384 bytes.
+        description: >-
+          JSON request body must not exceed 16,384 bytes. If needed, callers
+          remove the oldest complete history messages until the request fits;
+          never truncate the current question.
         content:
           application/json:
             schema:

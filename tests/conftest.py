@@ -84,10 +84,12 @@ class FakeJournal:
 class FakeAssistant:
     def __init__(self):
         self.calls = []
+        self.call_kwargs = []
         self.request_started_at = None
 
     def submit(self, product, question, **kwargs):
         self.calls.append((product, question))
+        self.call_kwargs.append(kwargs)
         self.request_started_at = kwargs.get("request_started_at")
         return JournalAttempt(
             attempt_id=1,
@@ -102,7 +104,7 @@ class FakeAssistant:
             answer="Відповідь за даними картки.",
             error_code=None,
             model_name="gpt-6-luna",
-            prompt_version="v17",
+            prompt_version="v18",
         )
 
 

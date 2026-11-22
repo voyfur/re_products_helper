@@ -9,7 +9,7 @@ from typing import Iterator
 
 
 MODEL_NAME = "gpt-6-luna"
-PROMPT_VERSION = "v17"
+PROMPT_VERSION = "v18"
 MIGRATION_PATH = Path(__file__).parent / "migrations" / "001_create_qa_attempts.sql"
 SEARCH_MIGRATION_PATH = Path(__file__).parent / "migrations" / "002_add_search_provenance.sql"
 

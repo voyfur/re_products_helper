@@ -70,7 +70,13 @@ class _Catalog:
 
 class _Assistant:
     @staticmethod
-    def submit(product: Product, question: str, *, request_started_at: float) -> Any:
+    def submit(
+        product: Product,
+        question: str,
+        *,
+        request_started_at: float,
+        history: Any = (),
+    ) -> Any:
         return SimpleNamespace(status="succeeded", answer="Контейнер smoke-проверен.")
 
 
@@ -113,7 +119,7 @@ async def _request(app: Any, method: str, path: str, body: bytes = b"", headers=
 
 
 def main() -> None:
-    if DEFAULT_PROMPT_VERSION != "v17":
+    if DEFAULT_PROMPT_VERSION != "v18":
         raise AssertionError("default_prompt_version_mismatch")
     for version, expected_hash in EXPECTED_PROMPT_HASHES.items():
         prompt = load_system_prompt(version)
@@ -158,7 +164,7 @@ def main() -> None:
     )
     if (health_status, ready_status, ask_status) != (200, 200, 200):
         raise AssertionError("container_route_smoke_failed")
-    print("container_smoke=passed prompts=v12,v13,v14,v15,v16,v17 health=200 ready=200 ask=200")
+    print("container_smoke=passed prompts=v12,v13,v14,v15,v16,v17,v18 health=200 ready=200 ask=200")
 
 
 if __name__ == "__main__":
