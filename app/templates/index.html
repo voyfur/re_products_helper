@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#3675b3">
+    <title>Race Expert — запитання про товар</title>
+    <link rel="stylesheet" href="/static/app.css?v=qa-v2">
+    <script src="/static/app.js?v=qa-v2" defer></script>
+  </head>
+  <body>
+    <div class="topline">
+      <div class="topline-inner">Внутрішній тестовий інтерфейс Race Expert</div>
+    </div>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="Race Expert — помічник із товару">
+          <span class="brand-mark" aria-hidden="true">RE</span>
+          <span class="brand-name">RACE EXPERT</span>
+        </a>
+        <span class="header-label">ПИТАННЯ ПРО ТОВАР</span>
+      </div>
+    </header>
+
+    <main class="shell">
+      <nav class="breadcrumb" aria-label="Навігаційний шлях">
+        <span>Race Expert</span>
+        <span class="breadcrumb-separator" aria-hidden="true">›</span>
+        <span>Помічник із товару</span>
+      </nav>
+
+      <section class="page-intro" aria-labelledby="page-title">
+        <p class="eyebrow">Помічник із товару</p>
+        <h1 id="page-title">Запитайте про товар</h1>
+        <p>Знайдіть товар за артикулом, моделлю або SKU й поставте запитання про його картку.</p>
+      </section>
+
+      <section class="lookup-panel" aria-labelledby="search-title">
+        <div class="lookup-heading">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <p class="eyebrow">Спочатку виберіть товар</p>
+            <h2 id="search-title">Знайдіть товар</h2>
+          </div>
+        </div>
+        <form id="search-form">
+          <label for="article-input">Артикул, модель або SKU</label>
+          <div class="input-row">
+            <input
+              id="article-input"
+              name="article"
+              autocomplete="off"
+              placeholder="Наприклад, RE0126"
+              required
+            >
+            <button id="search-button" class="button button-primary" type="submit">
+              Знайти товар
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </form>
+        <p class="field-hint">Пошук виконується за точним збігом у каталозі.</p>
+        <p id="search-message" class="message" role="status" aria-live="polite"></p>
+        <div id="candidate-list" class="candidate-list" aria-label="Знайдені товари" hidden></div>
+      </section>
+
+      <section id="product-panel" class="qa-layout" aria-label="Запитання про вибраний товар" hidden>
+        <article class="product-card" aria-labelledby="product-title">
+          <div class="product-card-top">
+            <p class="eyebrow">Поточний товар</p>
+            <span id="product-stock" class="stock-label" hidden></span>
+          </div>
+          <div class="product-identity">
+            <div class="product-mark" aria-hidden="true">RE</div>
+            <div class="product-title-wrap">
+              <p id="product-code" class="product-code"></p>
+              <h2 id="product-title">Картка товару</h2>
+            </div>
+          </div>
+          <p id="product-description" class="product-description" hidden></p>
+          <section id="product-facts" class="product-facts" aria-labelledby="facts-title" hidden>
+            <h3 id="facts-title">Характеристики з картки</h3>
+            <dl id="product-attributes" class="attributes"></dl>
+          </section>
+          <div class="verified-note">
+            <span class="verified-mark" aria-hidden="true">✓</span>
+            <p>Картка повторно перевіряється перед відповіддю.</p>
+          </div>
+        </article>
+
+        <section id="question-panel" class="assistant-panel" aria-labelledby="question-title">
+          <div class="assistant-kicker">
+            <span class="assistant-mark" aria-hidden="true">✦</span>
+            <span>Помічник із товару</span>
+            <span class="context-label">Перевірені дані про товар</span>
+          </div>
+          <h2 id="question-title">Запитайте штучний інтелект про цей товар</h2>
+          <p class="assistant-intro">Помічник використовує дані вибраного товару й за потреби шукає підтвердження виробника або схваленого постачальника.</p>
+
+          <div class="question-suggestions" aria-label="Приклади запитань">
+            <span class="suggestions-label">Можна запитати</span>
+            <button class="suggestion-chip" type="button">Як його вживати?</button>
+            <button class="suggestion-chip" type="button">Який склад продукту?</button>
+            <button class="suggestion-chip" type="button">Що вказано про порцію?</button>
+          </div>
+
+          <form id="question-form">
+            <label for="question-input">Ваше запитання</label>
+            <div class="textarea-wrap">
+              <textarea
+                id="question-input"
+                rows="4"
+                maxlength="2000"
+                placeholder="Напишіть запитання про вибраний товар…"
+                required
+                disabled
+              ></textarea>
+              <div class="textarea-meta">
+                <span>Відповідь буде українською</span>
+                <span id="question-counter">0 / 2000</span>
+              </div>
+            </div>
+            <div class="question-actions">
+              <p id="question-message" class="message" role="status" aria-live="polite"></p>
+              <button id="ask-button" class="button button-primary" type="submit" disabled>
+                Надіслати запитання
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </form>
+          <article id="latest-answer" class="answer" aria-live="polite" hidden></article>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

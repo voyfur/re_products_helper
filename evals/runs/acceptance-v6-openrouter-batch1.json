@@ -1,0 +1,107 @@
+{
+  "profile": "regression",
+  "mode": "compare",
+  "expected_cases": 60,
+  "paired_scenarios": 30,
+  "status": "fail",
+  "passed": false,
+  "provenance": {
+    "complete": true,
+    "rows_checked": 43,
+    "issue_count": 0,
+    "issues": [],
+    "omitted_issues": 0
+  },
+  "quality_evaluated": true,
+  "models": {
+    "nvidia/nemotron-3-ultra-550b-a55b:free": {
+      "status": "incomplete",
+      "passed": false,
+      "outputs": 12,
+      "answered": 6,
+      "availability": {
+        "answered": 6,
+        "expected": 60,
+        "passed": false,
+        "status_counts": {
+          "answered": 6,
+          "provider_error": 6
+        }
+      },
+      "scored_answers": 6,
+      "unscored_answers": 0,
+      "critical_failures": 0,
+      "critical_failure_cases": [],
+      "critical_failure_tags": {},
+      "mean_score": 7.833,
+      "scores_at_least_7": 6,
+      "required_scores_at_least_7": null,
+      "gates": {
+        "all_expected_results_present": false,
+        "all_answered_outputs_scored": true,
+        "zero_critical_failures": true,
+        "all_expected_cases_answered": false
+      }
+    },
+    "nvidia/nemotron-3.5-lightning:free": {
+      "status": "fail",
+      "passed": false,
+      "outputs": 12,
+      "answered": 12,
+      "availability": {
+        "answered": 12,
+        "expected": 60,
+        "passed": false,
+        "status_counts": {
+          "answered": 12
+        }
+      },
+      "scored_answers": 12,
+      "unscored_answers": 0,
+      "critical_failures": 1,
+      "critical_failure_cases": [
+        "re89157-ru-06"
+      ],
+      "critical_failure_tags": {
+        "unsupported_metadata_claim": 1
+      },
+      "mean_score": 7.25,
+      "scores_at_least_7": 9,
+      "required_scores_at_least_7": null,
+      "gates": {
+        "all_expected_results_present": false,
+        "all_answered_outputs_scored": true,
+        "zero_critical_failures": false,
+        "all_expected_cases_answered": false
+      }
+    },
+    "nvidia/nemotron-3.5-super-vl:free": {
+      "status": "incomplete",
+      "passed": false,
+      "outputs": 12,
+      "answered": 12,
+      "availability": {
+        "answered": 12,
+        "expected": 60,
+        "passed": false,
+        "status_counts": {
+          "answered": 12
+        }
+      },
+      "scored_answers": 12,
+      "unscored_answers": 0,
+      "critical_failures": 0,
+      "critical_failure_cases": [],
+      "critical_failure_tags": {},
+      "mean_score": 8.0,
+      "scores_at_least_7": 12,
+      "required_scores_at_least_7": null,
+      "gates": {
+        "all_expected_results_present": false,
+        "all_answered_outputs_scored": true,
+        "zero_critical_failures": true,
+        "all_expected_cases_answered": false
+      }
+    }
+  }
+}

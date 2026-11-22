@@ -1,0 +1,1696 @@
+{
+  "api_attempts": 56,
+  "final_model_results": 47,
+  "scored_answers": 31,
+  "by_model": {
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0": {
+      "completed_cases": 6,
+      "answered": 6,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 6,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re0731-uk-10",
+        "re1687-ru-04",
+        "re1687-uk-08",
+        "re89157-ru-01",
+        "re89157-uk-06"
+      ],
+      "mean_score": 6.833
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1": {
+      "completed_cases": 6,
+      "answered": 6,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 6,
+      "unscored_answered": 0,
+      "critical_failures": 1,
+      "critical_failure_tags": {
+        "unsupported_calculation": 1
+      },
+      "critical_failure_cases": [
+        "re1687-ru-04"
+      ],
+      "case_ids": [
+        "re0731-ru-01",
+        "re0731-uk-10",
+        "re1687-ru-04",
+        "re1687-uk-08",
+        "re89157-ru-01",
+        "re89157-uk-06"
+      ],
+      "mean_score": 6.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2": {
+      "completed_cases": 6,
+      "answered": 6,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 6,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re0731-uk-10",
+        "re1687-ru-04",
+        "re1687-uk-08",
+        "re89157-ru-01",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.333
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3": {
+      "completed_cases": 4,
+      "answered": 4,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 4,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re1687-ru-04",
+        "re1687-uk-08",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.75
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v4": {
+      "completed_cases": 3,
+      "answered": 3,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 3,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re1687-uk-03",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.667
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v5": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v0": {
+      "completed_cases": 3,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 1,
+      "critical_failure_tags": {
+        "resolved_conflict_by_guess": 1
+      },
+      "critical_failure_cases": [
+        "re89157-uk-06"
+      ],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-ru-01",
+        "re89157-uk-06"
+      ],
+      "mean_score": 5.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v1": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v2": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3": {
+      "completed_cases": 4,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 3,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re1687-ru-04",
+        "re1687-uk-08",
+        "re89157-uk-06"
+      ],
+      "mean_score": 8.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v0": {
+      "completed_cases": 3,
+      "answered": 1,
+      "provider_errors": 1,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-ru-01",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v1": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2": {
+      "completed_cases": 4,
+      "answered": 0,
+      "provider_errors": 3,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re1687-uk-08",
+        "re89157-ru-01",
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3": {
+      "completed_cases": 4,
+      "answered": 0,
+      "provider_errors": 3,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re1687-ru-04",
+        "re1687-uk-08",
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    }
+  },
+  "by_product_language": {
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|RE0731|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|RE0731|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-uk-10"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 6.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|RE89157|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 6.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|RE0731|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|RE0731|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-uk-10"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 1,
+      "critical_failure_tags": {
+        "unsupported_calculation": 1
+      },
+      "critical_failure_cases": [
+        "re1687-ru-04"
+      ],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": 3.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|RE89157|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 6.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|RE0731|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|RE0731|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-uk-10"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|RE89157|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3|RE0731|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v4|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v4|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-03"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v4|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v5|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v0|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v0|RE89157|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v0|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 1,
+      "critical_failure_tags": {
+        "resolved_conflict_by_guess": 1
+      },
+      "critical_failure_cases": [
+        "re89157-uk-06"
+      ],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 3.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v1|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v2|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3|RE0731|ru": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v0|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v0|RE89157|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v0|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v1|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2|RE89157|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3|RE0731|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3|RE1687|ru": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3|RE1687|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3|RE89157|uk": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    }
+  },
+  "by_category": {
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|availability": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 6.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|conflict": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": 6.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|fact_retrieval": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re89157-ru-01"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v0|scope_injection": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-uk-10"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|availability": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|conflict": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 1,
+      "critical_failure_tags": {
+        "unsupported_calculation": 1
+      },
+      "critical_failure_cases": [
+        "re1687-ru-04"
+      ],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": 4.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|fact_retrieval": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re89157-ru-01"
+      ],
+      "mean_score": 7.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v1|scope_injection": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-uk-10"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|availability": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|conflict": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|fact_retrieval": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01",
+        "re89157-ru-01"
+      ],
+      "mean_score": 7.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v2|scope_injection": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-uk-10"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3|availability": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3|conflict": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v3|fact_retrieval": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v4|conflict": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.5
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v4|historical_fact": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-03"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3-ultra-550b-a55b:free|v5|conflict": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 8.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v0|conflict": {
+      "completed_cases": 2,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 1,
+      "critical_failure_tags": {
+        "resolved_conflict_by_guess": 1
+      },
+      "critical_failure_cases": [
+        "re89157-uk-06"
+      ],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": 3.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v0|fact_retrieval": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": 7.0
+    },
+    "nvidia/nemotron-3.5-lightning:free|v1|conflict": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v2|conflict": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3|availability": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3|conflict": {
+      "completed_cases": 2,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 2,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "nvidia/nemotron-3.5-lightning:free|v3|fact_retrieval": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": 8.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v0|conflict": {
+      "completed_cases": 2,
+      "answered": 1,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v0|fact_retrieval": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v1|conflict": {
+      "completed_cases": 1,
+      "answered": 1,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 1,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-06"
+      ],
+      "mean_score": 7.0
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2|availability": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2|conflict": {
+      "completed_cases": 2,
+      "answered": 0,
+      "provider_errors": 2,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v2|fact_retrieval": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-01"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3|availability": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-08"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3|conflict": {
+      "completed_cases": 2,
+      "answered": 0,
+      "provider_errors": 2,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re89157-uk-06"
+      ],
+      "mean_score": null
+    },
+    "xingchen-agi/xing4.0-29b-a4b:free|v3|fact_retrieval": {
+      "completed_cases": 1,
+      "answered": 0,
+      "provider_errors": 0,
+      "empty": 1,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 0,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-01"
+      ],
+      "mean_score": null
+    }
+  }
+}

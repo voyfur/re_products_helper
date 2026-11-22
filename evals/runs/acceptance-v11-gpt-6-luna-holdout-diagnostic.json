@@ -1,0 +1,63 @@
+{
+  "profile": "holdout",
+  "mode": "compare",
+  "expected_cases": 30,
+  "paired_scenarios": 15,
+  "status": "pass",
+  "passed": true,
+  "provenance": {
+    "complete": true,
+    "rows_checked": 30,
+    "issue_count": 0,
+    "issues": [],
+    "omitted_issues": 0
+  },
+  "quality_evaluated": true,
+  "models": {
+    "gpt-6-luna": {
+      "status": "pass",
+      "passed": true,
+      "outputs": 30,
+      "answered": 30,
+      "availability": {
+        "answered": 30,
+        "expected": 30,
+        "passed": true,
+        "status_counts": {
+          "answered": 30
+        }
+      },
+      "scored_answers": 30,
+      "unscored_answers": 0,
+      "critical_failures": 0,
+      "critical_failure_cases": [],
+      "critical_failure_tags": {},
+      "mean_score": 7.967,
+      "scores_at_least_7": 30,
+      "required_scores_at_least_7": 29,
+      "gates": {
+        "all_expected_results_present": true,
+        "all_answered_outputs_scored": true,
+        "zero_critical_failures": true,
+        "all_expected_cases_answered": true,
+        "mean_score_at_least_7_75": true,
+        "minimum_scores_at_least_7": true,
+        "all_product_language_groups_at_least_7_5": true,
+        "language_gap_at_most_0_5_per_product": true
+      },
+      "product_language_means": {
+        "RE0731|ru": 7.8,
+        "RE0731|uk": 8.0,
+        "RE1687|ru": 8.0,
+        "RE1687|uk": 8.0,
+        "RE89157|ru": 8.0,
+        "RE89157|uk": 8.0
+      },
+      "language_gaps": {
+        "RE0731": 0.2,
+        "RE1687": 0.0,
+        "RE89157": 0.0
+      }
+    }
+  }
+}

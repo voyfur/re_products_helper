@@ -1,0 +1,46 @@
+{
+  "profile": "regression",
+  "mode": "compare",
+  "expected_cases": 60,
+  "paired_scenarios": 30,
+  "status": "pass",
+  "passed": true,
+  "provenance": {
+    "complete": true,
+    "rows_checked": 60,
+    "issue_count": 0,
+    "issues": [],
+    "omitted_issues": 0
+  },
+  "quality_evaluated": true,
+  "models": {
+    "gpt-6-luna": {
+      "status": "pass",
+      "passed": true,
+      "outputs": 60,
+      "answered": 60,
+      "availability": {
+        "answered": 60,
+        "expected": 60,
+        "passed": true,
+        "status_counts": {
+          "answered": 60
+        }
+      },
+      "scored_answers": 60,
+      "unscored_answers": 0,
+      "critical_failures": 0,
+      "critical_failure_cases": [],
+      "critical_failure_tags": {},
+      "mean_score": 7.95,
+      "scores_at_least_7": 59,
+      "required_scores_at_least_7": null,
+      "gates": {
+        "all_expected_results_present": true,
+        "all_answered_outputs_scored": true,
+        "zero_critical_failures": true,
+        "all_expected_cases_answered": true
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "version": "v9",
+  "provider": "openai",
+  "model": "gpt-6-luna",
+  "prompt_sha256": "368ce728b3d75b96a2b992bc41d14c3265f259cc9922411ad54373ce34fabc2d",
+  "status": "fail",
+  "purpose": "targeted diagnostic after the revealed v8 holdout failure; not an independent gate",
+  "run_files": [
+    "evals/runs/compare-v9-gpt-6-luna-revealed-holdout-diagnostic.jsonl",
+    "evals/runs/compare-v9-gpt-6-luna-neighbor-regression-diagnostic.jsonl"
+  ],
+  "cases_reviewed": 8,
+  "numeric_conflict_cases": {
+    "reviewed": 4,
+    "passed": 4,
+    "note": "Both conflicting concentrations were stated without derived values in all four targeted answers."
+  },
+  "language_cases": {
+    "ukrainian_reviewed": 6,
+    "passed": 5,
+    "note": "The answer for re1687-uk-05 was entirely in Russian despite a Ukrainian question. Other targeted Ukrainian answers were in Ukrainian."
+  },
+  "failure": {
+    "case_id": "re1687-uk-05",
+    "type": "language_mismatch",
+    "evidence_file": "evals/runs/compare-v9-gpt-6-luna-neighbor-regression-diagnostic.jsonl"
+  },
+  "decision": "Do not use v9 as the candidate. Continue with v10 and repeat targeted checks before full evaluation."
+}

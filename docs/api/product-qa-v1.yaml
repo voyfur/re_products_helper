@@ -1,0 +1,205 @@
+openapi: 3.1.0
+info:
+  title: Race Expert Product QA API
+  version: 1.0.0
+  description: >-
+    Server-to-server API for answering a buyer's current product question.
+    Product and provider metadata are private and are not returned.
+servers:
+  - url: http://127.0.0.1:8787
+    description: Local development only
+paths:
+  /api/v1/ask:
+    post:
+      operationId: askAboutProduct
+      summary: Answer a question about a product article
+      description: >-
+        The service resolves the exact article against the read-only product
+        catalog and answers only after current-product validation. A matching
+        article must resolve to exactly one product.
+      security:
+        - productQaBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AskRequest'
+            example:
+              article: RE0731
+              question: Який об’єм шейкера?
+      responses:
+        '200':
+          description: Answer generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskResponse'
+              example:
+                status: succeeded
+                answer: Об’єм шейкера — 500 мл.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '409':
+          $ref: '#/components/responses/ProductSelectionRequired'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '422':
+          $ref: '#/components/responses/InvalidRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '502':
+          $ref: '#/components/responses/AnswerUnavailable'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Liveness check
+      security: []
+      responses:
+        '200':
+          description: Process is running; this check does not connect to the catalog or providers.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    const: ok
+components:
+  securitySchemes:
+    productQaBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque API key
+      description: >-
+        Server-side only. Storefront browser code must never receive this key.
+  schemas:
+    AskRequest:
+      type: object
+      additionalProperties: false
+      required: [article, question]
+      properties:
+        article:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Exact Race Expert product article, matching a catalog model or SKU.
+        question:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: The buyer's current question in any language; the answer is Ukrainian.
+    AskResponse:
+      type: object
+      additionalProperties: false
+      required: [status, answer]
+      properties:
+        status:
+          type: string
+          const: succeeded
+        answer:
+          type: string
+          description: Buyer-facing Ukrainian answer. Contains no source URLs or provenance.
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+          enum:
+            - unauthorized
+            - product_not_found
+            - product_selection_required
+            - request_too_large
+            - invalid_request
+            - rate_limited
+            - answer_unavailable
+            - catalog_unavailable
+            - service_not_configured
+  responses:
+    Unauthorized:
+      description: Missing or invalid bearer credential.
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            const: Bearer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: unauthorized
+    ProductNotFound:
+      description: No product matches the article.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: product_not_found
+    ProductSelectionRequired:
+      description: The article matches more than one product and the service refuses to guess.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: product_selection_required
+    RequestTooLarge:
+      description: JSON request body exceeds 16 KiB.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: request_too_large
+    InvalidRequest:
+      description: Request fields are missing, too long, blank, or contain extra properties.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: invalid_request
+    RateLimited:
+      description: More than 60 accepted requests in the current 60-second window for the configured credential.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            const: 60
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: rate_limited
+    AnswerUnavailable:
+      description: A safe answer could not be generated.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: answer_unavailable
+    ServiceUnavailable:
+      description: Catalog is unavailable or server-to-server authentication is not configured.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            catalog:
+              value:
+                error: catalog_unavailable
+            configuration:
+              value:
+                error: service_not_configured

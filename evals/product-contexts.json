@@ -1,0 +1,242 @@
+{
+  "dataset_version": "1.0",
+  "evidence_note": "Product facts below are compact extracts from Wiki source snapshots. The MySQL endpoint identity was not independently verified against the live storefront. For RE1687, preparation and sodium details come from the earlier description snapshot and were not revalidated in the 2026-11-10 current-schema query.",
+  "products": {
+    "RE89157": {
+      "product_id": 7125,
+      "model": "RE89157",
+      "sku": "5999105923343",
+      "source_ref": "raw/sources/qa-evaluation-source-migration-2026-11-18.md",
+      "ru": {
+        "name": "Сывороточный протеин PureGold Compact Whey Gold (соленая карамель) 500 г",
+        "serving_g": 32,
+        "nutrition_per_100g": {
+          "energy_kcal": 394,
+          "fat_g": 4.5,
+          "saturated_fat_g": 2.6,
+          "carbohydrates_g": 12.8,
+          "sugars_g": 7.2,
+          "protein_g": 74.2,
+          "salt_g": 0.98,
+          "digezyme_mg": 100
+        },
+        "nutrition_per_32g": {
+          "energy_kcal": 126,
+          "fat_g": 1.4,
+          "saturated_fat_g": 0.8,
+          "carbohydrates_g": 4.1,
+          "sugars_g": 2.3,
+          "protein_g": 23.8,
+          "salt_g": 0.31,
+          "digezyme_mg": 32
+        },
+        "mixing": "Порцию 32 г смешать с 250–300 мл воды, молока или растительного напитка.",
+        "sweeteners": [
+          "сукралоза",
+          "ацесульфам K"
+        ],
+        "ingredients": [
+          "изолят сывороточного белка",
+          "концентрат сывороточного белка",
+          "ароматизатор соленой карамели",
+          "ксантановая камедь",
+          "сукралоза",
+          "ацесульфам K",
+          "ферментный комплекс DigeZyme: амилаза, протеаза, целлюлаза, лактаза, липаза"
+        ],
+        "package_title_g": 500,
+        "package_description_also_says_g": 2300,
+        "availability": {
+          "quantity": 200,
+          "status": 1,
+          "subtract": 0,
+          "stock_status_label": "Нет в наличии"
+        },
+        "base_price": "1150.0000",
+        "currency": null,
+        "special_price_checked": false,
+        "stored_weight_and_dimensions": 0,
+        "real_weight_or_dimensions_confirmed": false,
+        "structured_attributes": [
+          "только SKU"
+        ],
+        "tag": null,
+        "video_url": null
+      },
+      "uk": {
+        "name": "Сироватковий протеїн PureGold Compact Whey Gold (солона карамель) 500 г",
+        "serving_g": 32,
+        "nutrition_per_100g": {
+          "energy_kcal": 394,
+          "fat_g": 4.5,
+          "saturated_fat_g": 2.6,
+          "carbohydrates_g": 12.8,
+          "sugars_g": 7.2,
+          "protein_g": 74.2,
+          "salt_g": 0.98,
+          "digezyme_mg": 100
+        },
+        "nutrition_per_32g": {
+          "energy_kcal": 126,
+          "fat_g": 1.4,
+          "saturated_fat_g": 0.8,
+          "carbohydrates_g": 4.1,
+          "sugars_g": 2.3,
+          "protein_g": 23.8,
+          "salt_g": 0.31,
+          "digezyme_mg": 32
+        },
+        "mixing": "Порцію 32 г змішати з 250–300 мл води, молока або рослинного напою.",
+        "sweeteners": [
+          "сукралоза",
+          "ацесульфам K"
+        ],
+        "ingredients": [
+          "ізолят сироваткового білка",
+          "концентрат сироваткового білка",
+          "ароматизатор солоної карамелі",
+          "ксантанова камедь",
+          "сукралоза",
+          "ацесульфам K",
+          "ферментний комплекс DigeZyme: амілаза, протеаза, целюлаза, лактаза, ліпаза"
+        ],
+        "package_title_g": 500,
+        "package_description_also_says_g": 2300,
+        "availability": {
+          "quantity": 200,
+          "status": 1,
+          "subtract": 0,
+          "stock_status_label": "Немає в наявності"
+        },
+        "base_price": "1150.0000",
+        "currency": null,
+        "special_price_checked": false,
+        "stored_weight_and_dimensions": 0,
+        "real_weight_or_dimensions_confirmed": false,
+        "structured_attributes": [
+          "лише SKU"
+        ],
+        "tag": null,
+        "video_url": null
+      }
+    },
+    "RE1687": {
+      "product_id": 2017,
+      "model": "RE1687",
+      "sku": "5060623633844",
+      "source_ref": "raw/sources/qa-evaluation-source-migration-2026-11-18.md",
+      "description_detail_source_ref": "raw/sources/qa-evaluation-source-migration-2026-11-18.md",
+      "detail_source_note": "Preparation and sodium statements below were recorded in the earlier database snapshot; they were not independently revalidated in the 2026-11-10 query. The current query confirmed the localized name, SKU, price, stock fields, and that the description is nonempty.",
+      "ru": {
+        "name": "Изотоник Precision Hydration 1500 Tube, 10 таблеток",
+        "package_count_tablets": 10,
+        "preparation_from_earlier_description": "Одна таблетка на 500 мл.",
+        "sodium_claims_from_earlier_description": [
+          "1500 мг натрия на литр",
+          "1500 мг на 946 мл"
+        ],
+        "sodium_per_tablet_explicitly_stated": false,
+        "exact_ingredients_in_fixture": null,
+        "electrolyte_table_values_in_fixture": null,
+        "availability": {
+          "quantity": 132,
+          "status": 1,
+          "subtract": 0,
+          "stock_status_label": "Нет в наличии"
+        },
+        "base_price": "519.0000",
+        "currency": null,
+        "special_price_checked": false,
+        "stored_weight_and_dimensions": 0,
+        "real_weight_or_dimensions_confirmed": false,
+        "structured_attributes": [
+          "только SKU"
+        ],
+        "tag": null,
+        "video_url": null
+      },
+      "uk": {
+        "name": "Ізотонік Precision Hydration 1500 Tube, 10 таблеток",
+        "package_count_tablets": 10,
+        "preparation_from_earlier_description": "Одна таблетка на 500 мл.",
+        "sodium_claims_from_earlier_description": [
+          "1500 мг натрію на літр",
+          "1500 мг на 946 мл"
+        ],
+        "sodium_per_tablet_explicitly_stated": false,
+        "exact_ingredients_in_fixture": null,
+        "electrolyte_table_values_in_fixture": null,
+        "availability": {
+          "quantity": 132,
+          "status": 1,
+          "subtract": 0,
+          "stock_status_label": "Немає в наявності"
+        },
+        "base_price": "519.0000",
+        "currency": null,
+        "special_price_checked": false,
+        "stored_weight_and_dimensions": 0,
+        "real_weight_or_dimensions_confirmed": false,
+        "structured_attributes": [
+          "лише SKU"
+        ],
+        "tag": null,
+        "video_url": null
+      }
+    },
+    "RE0731": {
+      "product_id": 586,
+      "model": "RE0731",
+      "sku": "20004101",
+      "source_ref": "raw/sources/qa-evaluation-source-migration-2026-11-18.md",
+      "ru": {
+        "name": "Шейкер Sponser Classic Shaker, 500 мл",
+        "capacity_ml": 500,
+        "includes_blenderball_whisk": true,
+        "bpa_claim": "Описание говорит об отсутствии BPA.",
+        "closure": "В описании упоминается застёжка, точный тип в сохранённом извлечении не зафиксирован.",
+        "cleaning": "Упоминаются уход и посудомоечная машина; точные инструкции в сохранённом извлечении не зафиксированы.",
+        "availability": {
+          "quantity": 0,
+          "status": 1,
+          "subtract": 0,
+          "stock_status_label": "Нет в наличии"
+        },
+        "base_price": "108.0000",
+        "currency": null,
+        "special_price_checked": false,
+        "stored_weight_and_dimensions": 0,
+        "real_weight_or_dimensions_confirmed": false,
+        "structured_attributes": [
+          "только SKU"
+        ],
+        "tag": null,
+        "video_url": null
+      },
+      "uk": {
+        "name": "Шейкер Sponser Classic Shaker, 500 мл",
+        "capacity_ml": 500,
+        "includes_blenderball_whisk": true,
+        "bpa_claim": "В описі зазначено відсутність BPA.",
+        "closure": "В описі згадується застібка, точний тип у збереженому витягу не зафіксований.",
+        "cleaning": "Згадано догляд і посудомийну машину; точні інструкції у збереженому витягу не зафіксовані.",
+        "availability": {
+          "quantity": 0,
+          "status": 1,
+          "subtract": 0,
+          "stock_status_label": "Немає в наявності"
+        },
+        "base_price": "108.0000",
+        "currency": null,
+        "special_price_checked": false,
+        "stored_weight_and_dimensions": 0,
+        "real_weight_or_dimensions_confirmed": false,
+        "structured_attributes": [
+          "лише SKU"
+        ],
+        "tag": null,
+        "video_url": null
+      }
+    }
+  }
+}

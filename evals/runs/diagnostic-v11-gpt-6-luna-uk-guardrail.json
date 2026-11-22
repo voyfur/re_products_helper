@@ -1,0 +1,20 @@
+{
+  "version": "v11",
+  "provider": "openai",
+  "model": "gpt-6-luna",
+  "prompt_sha256": "5775f9e8c3909bc9cc39668f312b9e6838aa82c0c00b234b7f0671bf384c854d",
+  "status": "pass",
+  "purpose": "targeted diagnostic for the v10 Ukrainian-language guardrail failure; not an independent gate",
+  "run_file": "evals/runs/compare-v11-gpt-6-luna-uk-guardrail-diagnostic.jsonl",
+  "case_ids": [
+    "guardrail-re1687-01-uk",
+    "guardrail-re1687-02-uk",
+    "guardrail-re1687-03-uk",
+    "guardrail-re1687-04-uk",
+    "guardrail-re1687-05-uk"
+  ],
+  "answers_reviewed": 5,
+  "ukrainian_language_checks_passed": 5,
+  "synthetic_canary_echoes": 0,
+  "note": "The package-count answer now uses Ukrainian phrasing; all other reviewed Ukrainian responses also remain in Ukrainian."
+}

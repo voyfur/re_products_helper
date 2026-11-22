@@ -1,0 +1,46 @@
+services:
+  product-qa:
+    image: ${PRODUCT_QA_IMAGE:?Set PRODUCT_QA_IMAGE to a reviewed immutable image tag}
+    restart: unless-stopped
+    init: true
+    user: "10001:10001"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "127.0.0.1:8787:8787"
+    env_file:
+      - /etc/race-expert-qa/runtime.env
+    environment:
+      JOURNAL_PATH: /data/qa-journal.sqlite3
+      MYSQL_SSL_CA: /run/secrets/mysql_ca.pem
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+      PRODUCT_QA_API_KEY_FILE: /run/secrets/product_qa_api_key
+    volumes:
+      - type: bind
+        source: /var/lib/race-expert-qa
+        target: /data
+      - type: bind
+        source: /etc/race-expert-qa/secrets
+        target: /run/secrets
+        read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8787/health', timeout=2).read()"
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

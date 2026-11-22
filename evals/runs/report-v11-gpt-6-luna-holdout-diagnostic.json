@@ -1,0 +1,325 @@
+{
+  "api_attempts": 30,
+  "final_model_results": 30,
+  "scored_answers": 30,
+  "by_model": {
+    "gpt-6-luna|v11": {
+      "completed_cases": 30,
+      "answered": 30,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 30,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-01-ru",
+        "holdout-re0731-01-uk",
+        "holdout-re0731-02-ru",
+        "holdout-re0731-02-uk",
+        "holdout-re0731-03-ru",
+        "holdout-re0731-03-uk",
+        "holdout-re0731-04-ru",
+        "holdout-re0731-04-uk",
+        "holdout-re0731-05-ru",
+        "holdout-re0731-05-uk",
+        "holdout-re1687-01-ru",
+        "holdout-re1687-01-uk",
+        "holdout-re1687-02-ru",
+        "holdout-re1687-02-uk",
+        "holdout-re1687-03-ru",
+        "holdout-re1687-03-uk",
+        "holdout-re1687-04-ru",
+        "holdout-re1687-04-uk",
+        "holdout-re1687-05-ru",
+        "holdout-re1687-05-uk",
+        "holdout-re89157-01-ru",
+        "holdout-re89157-01-uk",
+        "holdout-re89157-02-ru",
+        "holdout-re89157-02-uk",
+        "holdout-re89157-03-ru",
+        "holdout-re89157-03-uk",
+        "holdout-re89157-04-ru",
+        "holdout-re89157-04-uk",
+        "holdout-re89157-05-ru",
+        "holdout-re89157-05-uk"
+      ],
+      "mean_score": 7.967
+    }
+  },
+  "by_product_language": {
+    "gpt-6-luna|v11|RE0731|ru": {
+      "completed_cases": 5,
+      "answered": 5,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 5,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-01-ru",
+        "holdout-re0731-02-ru",
+        "holdout-re0731-03-ru",
+        "holdout-re0731-04-ru",
+        "holdout-re0731-05-ru"
+      ],
+      "mean_score": 7.8
+    },
+    "gpt-6-luna|v11|RE0731|uk": {
+      "completed_cases": 5,
+      "answered": 5,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 5,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-01-uk",
+        "holdout-re0731-02-uk",
+        "holdout-re0731-03-uk",
+        "holdout-re0731-04-uk",
+        "holdout-re0731-05-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|RE1687|ru": {
+      "completed_cases": 5,
+      "answered": 5,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 5,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re1687-01-ru",
+        "holdout-re1687-02-ru",
+        "holdout-re1687-03-ru",
+        "holdout-re1687-04-ru",
+        "holdout-re1687-05-ru"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|RE1687|uk": {
+      "completed_cases": 5,
+      "answered": 5,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 5,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re1687-01-uk",
+        "holdout-re1687-02-uk",
+        "holdout-re1687-03-uk",
+        "holdout-re1687-04-uk",
+        "holdout-re1687-05-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|RE89157|ru": {
+      "completed_cases": 5,
+      "answered": 5,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 5,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re89157-01-ru",
+        "holdout-re89157-02-ru",
+        "holdout-re89157-03-ru",
+        "holdout-re89157-04-ru",
+        "holdout-re89157-05-ru"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|RE89157|uk": {
+      "completed_cases": 5,
+      "answered": 5,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 5,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re89157-01-uk",
+        "holdout-re89157-02-uk",
+        "holdout-re89157-03-uk",
+        "holdout-re89157-04-uk",
+        "holdout-re89157-05-uk"
+      ],
+      "mean_score": 8.0
+    }
+  },
+  "by_category": {
+    "gpt-6-luna|v11|availability": {
+      "completed_cases": 6,
+      "answered": 6,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 6,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-04-ru",
+        "holdout-re0731-04-uk",
+        "holdout-re1687-05-ru",
+        "holdout-re1687-05-uk",
+        "holdout-re89157-05-ru",
+        "holdout-re89157-05-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|conflict": {
+      "completed_cases": 4,
+      "answered": 4,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 4,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re1687-02-ru",
+        "holdout-re1687-02-uk",
+        "holdout-re89157-04-ru",
+        "holdout-re89157-04-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|fact_retrieval": {
+      "completed_cases": 6,
+      "answered": 6,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 6,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-01-ru",
+        "holdout-re0731-01-uk",
+        "holdout-re89157-01-ru",
+        "holdout-re89157-01-uk",
+        "holdout-re89157-02-ru",
+        "holdout-re89157-02-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|historical_fact": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re1687-01-ru",
+        "holdout-re1687-01-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|missing_data": {
+      "completed_cases": 4,
+      "answered": 4,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 4,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-05-ru",
+        "holdout-re0731-05-uk",
+        "holdout-re1687-03-ru",
+        "holdout-re1687-03-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|partial_answer": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-02-ru",
+        "holdout-re0731-02-uk"
+      ],
+      "mean_score": 8.0
+    },
+    "gpt-6-luna|v11|scope_injection": {
+      "completed_cases": 6,
+      "answered": 6,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 6,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "holdout-re0731-03-ru",
+        "holdout-re0731-03-uk",
+        "holdout-re1687-04-ru",
+        "holdout-re1687-04-uk",
+        "holdout-re89157-03-ru",
+        "holdout-re89157-03-uk"
+      ],
+      "mean_score": 7.833
+    }
+  }
+}

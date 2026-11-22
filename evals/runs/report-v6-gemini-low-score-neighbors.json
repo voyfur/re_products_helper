@@ -1,0 +1,275 @@
+{
+  "api_attempts": 24,
+  "final_model_results": 24,
+  "scored_answers": 23,
+  "by_model": {
+    "gemini-3.1-flash-lite|v6": {
+      "completed_cases": 24,
+      "answered": 23,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 23,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-08",
+        "re0731-ru-09",
+        "re0731-ru-10",
+        "re0731-uk-08",
+        "re0731-uk-09",
+        "re0731-uk-10",
+        "re1687-ru-04",
+        "re1687-ru-05",
+        "re1687-ru-06",
+        "re1687-ru-07",
+        "re1687-ru-08",
+        "re1687-ru-09",
+        "re1687-uk-04",
+        "re1687-uk-05",
+        "re1687-uk-06",
+        "re1687-uk-07",
+        "re1687-uk-08",
+        "re1687-uk-09",
+        "re89157-ru-08",
+        "re89157-ru-09",
+        "re89157-ru-10",
+        "re89157-uk-08",
+        "re89157-uk-09",
+        "re89157-uk-10"
+      ],
+      "mean_score": 7.696
+    }
+  },
+  "by_product_language": {
+    "gemini-3.1-flash-lite|v6|RE0731|ru": {
+      "completed_cases": 3,
+      "answered": 3,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 3,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-08",
+        "re0731-ru-09",
+        "re0731-ru-10"
+      ],
+      "mean_score": 7.667
+    },
+    "gemini-3.1-flash-lite|v6|RE0731|uk": {
+      "completed_cases": 3,
+      "answered": 3,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 3,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-uk-08",
+        "re0731-uk-09",
+        "re0731-uk-10"
+      ],
+      "mean_score": 7.667
+    },
+    "gemini-3.1-flash-lite|v6|RE1687|ru": {
+      "completed_cases": 6,
+      "answered": 6,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 6,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re1687-ru-05",
+        "re1687-ru-06",
+        "re1687-ru-07",
+        "re1687-ru-08",
+        "re1687-ru-09"
+      ],
+      "mean_score": 8.0
+    },
+    "gemini-3.1-flash-lite|v6|RE1687|uk": {
+      "completed_cases": 6,
+      "answered": 5,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 5,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-uk-04",
+        "re1687-uk-05",
+        "re1687-uk-06",
+        "re1687-uk-07",
+        "re1687-uk-08",
+        "re1687-uk-09"
+      ],
+      "mean_score": 7.4
+    },
+    "gemini-3.1-flash-lite|v6|RE89157|ru": {
+      "completed_cases": 3,
+      "answered": 3,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 3,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-08",
+        "re89157-ru-09",
+        "re89157-ru-10"
+      ],
+      "mean_score": 7.667
+    },
+    "gemini-3.1-flash-lite|v6|RE89157|uk": {
+      "completed_cases": 3,
+      "answered": 3,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 3,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-uk-08",
+        "re89157-uk-09",
+        "re89157-uk-10"
+      ],
+      "mean_score": 7.667
+    }
+  },
+  "by_category": {
+    "gemini-3.1-flash-lite|v6|abstention": {
+      "completed_cases": 2,
+      "answered": 2,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 2,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re89157-ru-08",
+        "re89157-uk-08"
+      ],
+      "mean_score": 8.0
+    },
+    "gemini-3.1-flash-lite|v6|availability": {
+      "completed_cases": 4,
+      "answered": 4,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 4,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-08",
+        "re0731-uk-08",
+        "re1687-ru-08",
+        "re1687-uk-08"
+      ],
+      "mean_score": 7.75
+    },
+    "gemini-3.1-flash-lite|v6|conflict": {
+      "completed_cases": 4,
+      "answered": 4,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 4,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re1687-ru-04",
+        "re1687-ru-05",
+        "re1687-uk-04",
+        "re1687-uk-05"
+      ],
+      "mean_score": 7.5
+    },
+    "gemini-3.1-flash-lite|v6|missing_data": {
+      "completed_cases": 10,
+      "answered": 9,
+      "provider_errors": 1,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 9,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-09",
+        "re0731-uk-09",
+        "re1687-ru-06",
+        "re1687-ru-07",
+        "re1687-ru-09",
+        "re1687-uk-06",
+        "re1687-uk-07",
+        "re1687-uk-09",
+        "re89157-ru-09",
+        "re89157-uk-09"
+      ],
+      "mean_score": 7.667
+    },
+    "gemini-3.1-flash-lite|v6|scope_injection": {
+      "completed_cases": 4,
+      "answered": 4,
+      "provider_errors": 0,
+      "empty": 0,
+      "truncated": 0,
+      "other_statuses": 0,
+      "scored_answers": 4,
+      "unscored_answered": 0,
+      "critical_failures": 0,
+      "critical_failure_tags": {},
+      "critical_failure_cases": [],
+      "case_ids": [
+        "re0731-ru-10",
+        "re0731-uk-10",
+        "re89157-ru-10",
+        "re89157-uk-10"
+      ],
+      "mean_score": 7.75
+    }
+  }
+}

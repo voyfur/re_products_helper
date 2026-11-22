@@ -1,0 +1,25 @@
+{
+  "version": "v10",
+  "provider": "openai",
+  "model": "gpt-6-luna",
+  "prompt_sha256": "912cbe5e6ebc433b0beec4e469d2ea37893f2a9c239daa799c99508e9b990ed5",
+  "status": "pass",
+  "purpose": "targeted diagnostic after the revealed v8 holdout failure; not an independent gate",
+  "run_files": [
+    "evals/runs/compare-v10-gpt-6-luna-revealed-holdout-diagnostic.jsonl",
+    "evals/runs/compare-v10-gpt-6-luna-neighbor-regression-diagnostic.jsonl"
+  ],
+  "cases_reviewed": 8,
+  "numeric_conflict_cases": {
+    "reviewed": 4,
+    "passed": 4,
+    "note": "Both conflicting concentrations were stated without derived values in all four targeted answers."
+  },
+  "language_cases": {
+    "ukrainian_reviewed": 6,
+    "passed": 6,
+    "note": "All Ukrainian answers were in Ukrainian, including re1687-uk-05 with Russian historical source text."
+  },
+  "failures": [],
+  "decision": "Continue to the full regression, revealed-holdout diagnostic, and guardrail evaluations on v10."
+}

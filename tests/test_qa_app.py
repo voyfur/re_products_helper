@@ -1,0 +1,299 @@
+import sqlite3
+
+from app.assistant import load_system_prompt
+from app.catalog import CatalogSettings, SEARCH_PRODUCTS_SQL
+from app.config import Settings
+from app.journal import Journal
+from app.main import create_app
+
+
+def _versioned_client(harness, tmp_path):
+    from fastapi.testclient import TestClient
+
+    settings = Settings(
+        journal_path=tmp_path / "unused.sqlite3",
+        mysql=CatalogSettings(
+            host="unused",
+            port=3306,
+            database="unused",
+            user="unused",
+            password="synthetic-password",
+        ),
+        openai_api_key=None,
+        tavily_api_key=None,
+        integration_api_key="synthetic-site-key",
+    )
+    app = create_app(
+        catalog=harness.catalog,
+        journal=Journal(tmp_path / "journal.sqlite3"),
+        assistant=harness.assistant,
+        settings=settings,
+    )
+    return TestClient(app)
+
+
+def test_health_and_html_are_available(harness):
+    assert harness.client.get("/health").json() == {"status": "ok"}
+    page = harness.client.get("/")
+    assert page.status_code == 200
+    assert "Запитайте штучний інтелект про цей товар" in page.text
+    assert "Відповідь буде українською" in page.text
+    assert "відгук" not in page.text.lower()
+    assert "/api/product-overview" not in page.text
+    assert "/api/reviews" not in page.text
+
+
+def test_readiness_checks_the_catalog_without_changing_liveness(harness):
+    assert harness.client.get("/health").json() == {"status": "ok"}
+
+    response = harness.client.get("/ready")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ready"}
+    assert harness.catalog.readiness_queries == ["SELECT 1"]
+    assert harness.catalog.readiness_cursor_closed is True
+
+
+def test_readiness_hides_catalog_connection_errors(harness):
+    harness.catalog.readiness_error = RuntimeError("private db host must not leak")
+
+    response = harness.client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {"status": "unavailable"}
+    assert "private db host" not in response.text
+
+
+def test_qa_waiting_copy_is_truthful_before_search_starts(harness):
+    script = harness.client.get("/static/app.js")
+
+    assert script.status_code == 200
+    assert "Готуємо відповідь про вибраний товар" in script.text
+    assert "Перевіряємо джерела" not in script.text
+
+
+def test_generated_openapi_matches_the_public_server_contract(harness):
+    schema = harness.app.openapi()
+
+    assert set(schema["paths"]) == {"/api/v1/ask", "/health"}
+    operation = schema["paths"]["/api/v1/ask"]["post"]
+    assert operation["security"] == [{"productQaBearer": []}]
+    assert {"200", "401", "404", "409", "413", "422", "429", "502", "503"} <= set(
+        operation["responses"]
+    )
+    assert operation["responses"]["401"]["headers"]["WWW-Authenticate"]["schema"][
+        "const"
+    ] == "Bearer"
+
+    request_schema = schema["components"]["schemas"]["VersionedAskRequest"]
+    assert set(request_schema["required"]) == {"article", "question"}
+    assert request_schema["additionalProperties"] is False
+    assert request_schema["properties"]["article"]["maxLength"] == 128
+    assert request_schema["properties"]["question"]["maxLength"] == 2000
+
+    response_schema = schema["components"]["schemas"]["AskResponse"]
+    assert set(response_schema["required"]) == {"status", "answer"}
+    assert response_schema["properties"]["status"]["const"] == "succeeded"
+    error_schema = schema["components"]["schemas"]["ApiErrorResponse"]
+    assert "request_too_large" in error_schema["properties"]["error"]["enum"]
+    assert schema["paths"]["/api/v1/ask"]["post"]["responses"]["429"]["headers"][
+        "Retry-After"
+    ]["schema"]["const"] == 60
+    assert schema["components"]["securitySchemes"]["productQaBearer"] == {
+        "type": "http",
+        "description": "Server-side only. Storefront browser code must never receive this key.",
+        "scheme": "bearer",
+        "bearerFormat": "opaque API key",
+    }
+    health_schema = schema["paths"]["/health"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+    assert health_schema["$ref"] == "#/components/schemas/HealthResponse"
+    assert schema["components"]["schemas"]["HealthResponse"]["properties"]["status"][
+        "const"
+    ] == "ok"
+
+
+def test_versioned_api_enforces_body_and_field_limits(harness, tmp_path):
+    client = _versioned_client(harness, tmp_path)
+    headers = {"Authorization": "Bearer synthetic-site-key"}
+
+    oversized = client.post(
+        "/api/v1/ask",
+        content=b"x" * 16_385,
+        headers=headers,
+    )
+    long_question = client.post(
+        "/api/v1/ask",
+        json={"article": "RE0731", "question": "x" * 2_001},
+        headers=headers,
+    )
+    extra_field = client.post(
+        "/api/v1/ask",
+        json={"article": "RE0731", "question": "Який об’єм?", "email": "buyer@example.test"},
+        headers=headers,
+    )
+
+    assert oversized.status_code == 413
+    assert oversized.json() == {"error": "request_too_large"}
+    assert long_question.status_code == 422
+    assert long_question.json() == {"error": "invalid_request"}
+    assert extra_field.status_code == 422
+    assert extra_field.json() == {"error": "invalid_request"}
+    assert harness.catalog.searches == []
+    assert harness.assistant.calls == []
+
+
+def test_versioned_api_authentication_and_rate_limit_are_bounded(harness, tmp_path):
+    client = _versioned_client(harness, tmp_path)
+    payload = {"article": "UNKNOWN-ARTICLE", "question": "Який об’єм?"}
+
+    missing = client.post("/api/v1/ask", json=payload)
+    invalid = client.post(
+        "/api/v1/ask",
+        headers={"Authorization": "Bearer invalid-site-key"},
+        json=payload,
+    )
+    assert missing.status_code == invalid.status_code == 401
+    assert missing.json() == invalid.json() == {"error": "unauthorized"}
+    assert missing.headers["www-authenticate"] == "Bearer"
+    assert harness.catalog.searches == []
+
+    headers = {"Authorization": "Bearer synthetic-site-key"}
+    for _ in range(60):
+        response = client.post("/api/v1/ask", headers=headers, json=payload)
+        assert response.status_code == 404
+        assert response.json() == {"error": "product_not_found"}
+
+    limited = client.post("/api/v1/ask", headers=headers, json=payload)
+
+    assert limited.status_code == 429
+    assert limited.json() == {"error": "rate_limited"}
+    assert limited.headers["retry-after"] == "60"
+    assert harness.assistant.calls == []
+
+
+def test_versioned_api_errors_hide_catalog_and_provider_details(harness, tmp_path):
+    client = _versioned_client(harness, tmp_path)
+    headers = {"Authorization": "Bearer synthetic-site-key"}
+
+    def fail_catalog(*_args, **_kwargs):
+        raise RuntimeError("mysql_password=synthetic-db-secret")
+
+    harness.catalog.search_products = fail_catalog
+    catalog_error = client.post(
+        "/api/v1/ask",
+        headers=headers,
+        json={"article": "RE0731", "question": "Який об’єм?"},
+    )
+    assert catalog_error.status_code == 503
+    assert catalog_error.json() == {"error": "catalog_unavailable"}
+    assert "synthetic-db-secret" not in catalog_error.text
+
+    def fail_assistant(*_args, **_kwargs):
+        raise RuntimeError("openai_api_key=synthetic-provider-secret")
+
+    harness.catalog.search_products = lambda *_args, **_kwargs: [harness.catalog.products[0]]
+    harness.assistant.submit = fail_assistant
+    provider_error = client.post(
+        "/api/v1/ask",
+        headers=headers,
+        json={"article": "RE0731", "question": "Який об’єм?"},
+    )
+
+    assert provider_error.status_code == 502
+    assert provider_error.json() == {"error": "answer_unavailable"}
+    assert "synthetic-provider-secret" not in provider_error.text
+
+
+def test_search_returns_both_locales_without_price(harness):
+    response = harness.client.get("/api/search", params={"article": "RE0731"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "single"
+    assert body["product"]["languages"]["uk"]["stock_label"] == "Немає в наявності"
+    assert body["product"]["languages"]["ru"]["name"] == "Шейкер"
+    assert body["product"]["languages"]["uk"]["description"] == "500 мл"
+    assert "price" not in str(body).lower()
+
+
+def test_catalog_failure_logs_only_safe_error_metadata(harness, caplog):
+    def fail_search(*args, **kwargs):
+        error = RuntimeError("mysql_password=must-not-be-logged")
+        error.errno = 2003
+        raise error
+
+    harness.catalog.search_products = fail_search
+
+    response = harness.client.get("/api/search", params={"article": "RE0731"})
+
+    assert response.status_code == 503
+    assert "catalog_unavailable error_type=RuntimeError error_code=2003" in caplog.text
+    assert "must-not-be-logged" not in caplog.text
+    assert "mysql_password" not in caplog.text
+
+
+def test_ask_revalidates_product_and_only_calls_assistant_for_match(harness):
+    response = harness.client.post(
+        "/api/ask",
+        json={"article": "RE0731", "product_id": 586, "question": "Скільки мілілітрів?"},
+    )
+    assert response.status_code == 200
+    assert response.json()["attempt"]["prompt_version"] == "v17"
+    assert len(harness.assistant.calls) == 1
+
+    rejected = harness.client.post(
+        "/api/ask",
+        json={"article": "RE0731", "product_id": 999, "question": "Що це?"},
+    )
+    assert rejected.status_code == 409
+    assert rejected.json() == {"error": "product_selection_required"}
+    assert len(harness.assistant.calls) == 1
+
+
+def test_unrelated_routes_are_not_registered(harness):
+    assert harness.client.post("/api/reviews", json={}).status_code == 404
+    assert harness.client.post("/api/product-overview", json={}).status_code == 404
+    assert harness.client.get("/api/history").status_code == 404
+
+
+def test_catalog_query_only_reads_product_card_tables():
+    assert "oc_review" not in SEARCH_PRODUCTS_SQL
+    for table in (
+        "oc_product",
+        "oc_product_description",
+        "oc_product_attribute",
+        "oc_attribute_description",
+        "oc_stock_status",
+    ):
+        assert table in SEARCH_PRODUCTS_SQL
+
+
+def test_journal_has_only_qa_attempts(tmp_path):
+    journal = Journal(tmp_path / "journal.sqlite3")
+    attempt = journal.create_attempt(
+        product_id=586,
+        article="RE0731",
+        model="RE0731",
+        sku="20004101",
+        product_name="Шейкер",
+        question="Какой объём?",
+    )
+    journal.complete_attempt(attempt.attempt_id, "Відповідь.")
+    saved = journal.get_attempt(attempt.attempt_id)
+    assert saved.status == "succeeded"
+    assert saved.prompt_version == "v17"
+
+    with sqlite3.connect(journal.path) as connection:
+        tables = {
+            row[0] for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'"
+            )
+        }
+    assert tables == {"attempts"}
+
+
+def test_active_prompt_matches_pinned_hash():
+    prompt = load_system_prompt()
+    assert "Всегда отвечай только на украинском языке" in prompt
+    assert "Не добавляй знания из памяти" in prompt
