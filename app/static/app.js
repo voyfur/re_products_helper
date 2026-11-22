@@ -20,6 +20,7 @@ const suggestionChips = document.querySelectorAll(".suggestion-chip");
 
 let selectedProduct = null;
 let searchToken = 0;
+let conversationHistory = [];
 
 function setMessage(node, text, kind = "") {
   node.textContent = text;
@@ -105,6 +106,8 @@ function renderCandidates(products) {
 
 async function searchProduct(article) {
   const token = ++searchToken;
+  conversationHistory = [];
+  renderTranscript();
   selectedProduct = null;
   productPanel.hidden = true;
   candidateList.replaceChildren();
@@ -175,6 +178,37 @@ function renderAnswer(attempt) {
   );
 }
 
+function renderTranscript() {
+  const transcript = document.querySelector("#conversation-transcript");
+  const messages = document.querySelector("#conversation-messages");
+  messages.replaceChildren();
+  conversationHistory.forEach((message) => {
+    const item = document.createElement("li");
+    item.className = "conversation-message conversation-message-" + message.role;
+    item.append(
+      textElement("span", "conversation-role", message.role === "user" ? "Ви" : "Помічник"),
+      textElement("p", "conversation-content", message.content),
+    );
+    messages.append(item);
+  });
+  transcript.hidden = conversationHistory.length === 0;
+}
+
+function askRequestBody(question) {
+  const payload = {
+    article: selectedProduct.article,
+    product_id: selectedProduct.product_id,
+    question,
+    history: conversationHistory.slice(-9).map(({ role, content }) => ({ role, content })),
+  };
+  let body = JSON.stringify(payload);
+  while (new TextEncoder().encode(body).length > 16_384 && payload.history.length > 0) {
+    payload.history.shift();
+    body = JSON.stringify(payload);
+  }
+  return body;
+}
+
 questionForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const question = questionInput.value.trim();
@@ -190,11 +224,7 @@ questionForm.addEventListener("submit", async (event) => {
     const response = await fetch("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({
-        article: selectedProduct.article,
-        product_id: selectedProduct.product_id,
-        question,
-      }),
+      body: askRequestBody(question),
     });
     const body = await response.json();
     if (!response.ok) {
@@ -207,6 +237,14 @@ questionForm.addEventListener("submit", async (event) => {
       return;
     }
     renderAnswer(body.attempt);
+    if (body.attempt.status === "succeeded" && body.attempt.answer) {
+      conversationHistory.push(
+        { role: "user", content: question },
+        { role: "assistant", content: body.attempt.answer },
+      );
+      conversationHistory = conversationHistory.slice(-10);
+      renderTranscript();
+    }
     setMessage(
       questionMessage,
       body.attempt.status === "succeeded" ? "Готово." : "Не вдалося отримати відповідь.",
