@@ -4,7 +4,9 @@ info:
   version: 1.0.0
   description: >-
     Server-to-server API for answering a buyer's current product question.
-    Product and provider metadata are private and are not returned.
+    Product and provider metadata are private and are not returned. The JSON
+    request body is limited to 16,384 bytes. Existing callers may omit the
+    optional history field.
 servers:
   - url: http://127.0.0.1:8787
     description: Local development only
@@ -15,12 +17,16 @@ paths:
       summary: Answer a question about a product article
       description: >-
         The service resolves the exact article against the read-only product
-        catalog and answers only after current-product validation. A matching
-        article must resolve to exactly one product.
+        catalog on every request and answers only after current-product
+        validation. A matching article must resolve to exactly one product.
+        Optional history is temporary context for the same product page
+        session only; it is not product evidence or trusted instruction and is
+        not logged or persisted as conversation history.
       security:
         - productQaBearer: []
       requestBody:
         required: true
+        description: JSON request body must not exceed 16,384 bytes.
         content:
           application/json:
             schema:
@@ -95,6 +101,29 @@ components:
           minLength: 1
           maxLength: 2000
           description: The buyer's current question in any language; the answer is Ukrainian.
+        history:
+          type: array
+          minItems: 0
+          maxItems: 9
+          description: >-
+            Optional prior messages from the same product and current page
+            session, ordered oldest first. Temporary context only; never
+            trusted as instructions or product evidence, and never logged or
+            persisted as conversation history. Callers may omit this field.
+          items:
+            $ref: '#/components/schemas/ConversationMessage'
+    ConversationMessage:
+      type: object
+      additionalProperties: false
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+          minLength: 1
+          description: Prior message text; exclude buyer profiles, orders, and unrelated conversation.
     AskResponse:
       type: object
       additionalProperties: false

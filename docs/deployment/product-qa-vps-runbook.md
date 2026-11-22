@@ -125,16 +125,24 @@ docker compose -f deploy/compose.production.yaml exec -T product-qa \
 
 ## 6. Подключить backend сайта
 
-Backend сайта конфигурирует финальный URL `https://<выбранный-host>/api/v1/ask` и получает отдельный Product QA bearer key из server-side secret store. Браузер вызывает только backend сайта. В Product QA отправляй только:
+Backend сайта конфигурирует финальный URL `https://<выбранный-host>/api/v1/ask` и получает отдельный Product QA bearer key из server-side secret store. Браузер вызывает только backend сайта; ключ остаётся server-side и не передаётся браузеру. В Product QA отправляй обязательные `article` и текущий `question`, а также необязательную `history`:
 
 ```json
 {
   "article": "<article/model/SKU>",
-  "question": "<текущий вопрос о товаре>"
+  "question": "<текущий вопрос о товаре>",
+  "history": [
+    {"role": "user", "content": "<предыдущее сообщение>"},
+    {"role": "assistant", "content": "<предыдущий ответ>"}
+  ]
 }
 ```
 
-Не отправляй `product_id`, цену, заказ, buyer identity, историю чата или товарный context от браузера. Не передавай backend-разработчику Tavily/OpenAI/DB/SSH credentials.
+`history` можно опустить для совместимости со старыми клиентами. Если она передаётся, это от нуля до девяти предыдущих сообщений с ролями `user`/`assistant` только из той же сессии страницы и того же товара. Сбрасывай её при смене товара или перезагрузке страницы. История — временный контекст: сервис не доверяет ей как инструкции или фактам о товаре и не записывает/сохраняет её как историю разговора.
+
+JSON-тело ограничено 16 384 байтами. Если сериализованный запрос превышает лимит, backend сайта удаляет самые старые сообщения `history` целиком, пока запрос не поместится; текущий `question` не обрезается.
+
+Не отправляй `product_id`, цену, корзину, заказы, buyer profile/identity, разговоры из других товаров или сессий либо товарный context от браузера как подтверждённый. Сервис заново разрешает артикул и проверяет точный товар на каждом запросе. Не передавай backend-разработчику Tavily/OpenAI/DB/SSH credentials.
 
 На первом smoke проверь unauthenticated `401` и корректную обработку `404`, `409`, `429`, `502`, `503`. Любой live Q&A вызов потребляет provider budget и создаёт запись в SQLite, поэтому пользовательский запрос для интеграционного теста должен быть согласован отдельно.
 
@@ -153,12 +161,12 @@ docker compose -f deploy/compose.production.yaml exec -T product-qa \
 
 ## Acceptance перед подключением трафика
 
-- Image собран для архитектуры целевого VPS и содержит ожидаемый hash активного prompt v17.
+- Image собран для архитектуры целевого VPS и содержит ожидаемый hash активного prompt v18 (`87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f`).
 - MySQL TLS CA и hostname verification проходят, grants ограничены пятью таблицами.
 - `/ready` отвечает только внутри VPS; публичны только разрешённые Nginx routes.
 - Вызов сайта проходит по HTTPS через действующий hostname и certificate verification; отдельный API hostname/DNS/TLS требуется только если существующий virtual host использовать нельзя. Firewall и MySQL allowlist ограничены.
 - `/data` persistent, права владельца `10001:10001`, backup зашифрован вне VPS, restore drill записан.
-- Backend сайта хранит Product QA bearer key server-side и вызывает только `/api/v1/ask`.
+- Backend сайта хранит Product QA bearer key server-side и вызывает только `/api/v1/ask`; если он передаёт `history`, то только в той же product page session.
 - Retention, timeout/SLO, rate-limit expectation и key rotation задокументированы владельцем/оператором до рабочего трафика.
 
 Этот runbook готовит разработчика к установке на выбранном VPS. Команды здесь не выполнялись на production host; storefront, DNS, staging и deploy не менялись.

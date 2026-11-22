@@ -1,6 +1,6 @@
 # Race Expert QA — вопросы о товаре
 
-Это отдельный проект backend для поиска товара и ответов на вопросы по его карточке. В рабочем коде активен prompt v17; файлы v12–v16 и их зафиксированные SHA-256 сохранены без изменений. Ответы GPT-6 Luna всегда на украинском, независимо от языка вопроса.
+Это отдельный проект backend для поиска товара и ответов на вопросы по его карточке. В рабочем коде активен prompt v18 (`87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f`); v17 и v12–v16 с их зафиксированными SHA-256 сохранены без изменений. Ответы GPT-6 Luna всегда на украинском, независимо от языка вопроса.
 
 ## Как работает
 
@@ -8,7 +8,7 @@
 2. Перед отправкой вопроса сервер повторно сверяет артикул и product_id с каталогом.
 3. Модели передаются сведения украинской карточки выбранного товара и текущий вопрос. При необходимости backend может один раз обратиться к Tavily по утверждённому allowlist.
 4. К модели допускаются только точные данные производителя/поставщика; отзывы могут подтверждать лишь анонимную субъективную тему по точному товару минимум на двух независимых одобренных платформах.
-5. Вопрос, ответ и приватные metadata попытки сохраняются в отдельном SQLite-журнале. Исходные excerpts, тексты отзывов, авторы и профили не сохраняются; buyer-facing API не выдаёт provenance.
+5. Текущие вопрос, ответ и приватные metadata попытки сохраняются в отдельном SQLite-журнале. Переданная `history` — временный контекст, она не журналируется и не сохраняется как история разговора. Исходные excerpts, тексты отзывов, авторы и профили не сохраняются; buyer-facing API не выдаёт provenance.
 
 Каталог использует read-only запросы только к пяти таблицам карточки товара: oc_product, oc_product_description, oc_product_attribute, oc_attribute_description и oc_stock_status. Для локального запуска используется одобренный SSH-туннель через VPS-61125. MySQL TLS обязателен, но проверка его сертификата отключена только в этой локальной сессии; проверка SSH host key остаётся включена. Это не постоянная backend-конфигурация и не разрешение на staging/production.
 
@@ -42,7 +42,7 @@ python -m pip install -r requirements.txt
 
 ## API для будущего подключения сайта
 
-Backend сайта Race Expert будет отправлять в Product QA артикул товара и текущий вопрос через `POST /api/v1/ask`. Сервис сам ищет и проверяет товар в каталоге; сайт не передаёт неподтверждённый product snapshot, а browser не получает provider/API secrets. Контракт и порядок интеграции: [OpenAPI v1](docs/api/product-qa-v1.yaml) и [handoff для backend-разработчика](docs/api/product-qa-integration.md). Интерфейс Rozetka AI адаптирован как отдельный [brief виджета](docs/ui/product-qa-widget-brief.md); его код пока не подключён к storefront.
+Будущий backend сайта Race Expert может отправлять в Product QA артикул, текущий вопрос и необязательное окно до девяти прошлых сообщений через `POST /api/v1/ask`. Старые клиенты могут не передавать `history`; новый вызывающий backend должен ограничивать её той же сессией страницы и товаром и очищать при смене товара или перезагрузке. Сервис сам повторно проверяет точный товар в каталоге на каждом запросе; сайт не передаёт неподтверждённый product snapshot, а browser не получает provider/API secrets. Это описание будущей интеграции; backend сайта и storefront здесь не изменены. Контракт и порядок интеграции: [OpenAPI v1](docs/api/product-qa-v1.yaml) и [handoff для backend-разработчика](docs/api/product-qa-integration.md). Интерфейс Rozetka AI адаптирован как отдельный [brief виджета](docs/ui/product-qa-widget-brief.md); его код пока не подключён к storefront.
 
 Внешний API требует отдельный server-to-server bearer key через `PRODUCT_QA_API_KEY_FILE`. Rate limit в текущей реализации — 60 запросов в минуту для активного ключа в одном процессе. Публичные OpenAPI/docs UI не включены. Старые `/api/search`, `/api/ask`, `/` и `/static/` предназначены только для локального QA UI и не должны публиковаться через production reverse proxy. Так как API устанавливается на VPS сайта, отдельная DNS-запись не нужна, если оператор подключит точный API route через существующий HTTPS virtual host сайта. Схема VPS описана в [production blueprint](docs/deployment/product-qa-production-blueprint.md), а установка — в [VPS install handoff](docs/deployment/product-qa-vps-runbook.md).
 
@@ -74,7 +74,7 @@ python -m pytest -q
 ## Папки проекта
 
 - app/ — Q&A API, каталог, prompt loader и журнал попыток.
-- prompts/product-assistant-system-v*.md — история Q&A prompt; v17 активен, v12–v16 сохранены.
+- prompts/product-assistant-system-v*.md — история Q&A prompt; v18 активен, v12–v17 сохранены.
 - evals/ — наборы и сохранённые оценки качества ответов.
 - docs/ — [краткая инструкция](docs/test-harness/qa-quick-guide.md), [история архитектуры](docs/test-harness/qa-architecture-history.md), спецификации, планы Q&A и [историческая live-проверка v11](docs/test-harness/qa-live-run-report-2026-11-13.md).
 - scripts/run_local_session.py — локальное Q&A-приложение через SSH-туннель; полный порядок — в [runbook](docs/test-harness/local-session-runbook.md).
