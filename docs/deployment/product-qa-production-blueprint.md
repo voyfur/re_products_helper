@@ -71,13 +71,9 @@ DBA должен создать отдельного пользователя, �
 
 Из 18 supported-brand пропусков 15 — SiS (RE0126, RE0667 и RE1163, по Q2/Q3/Q4/Q6/Q7); они выглядят как вероятно пропущенные fact searches. Ещё один (RE2466 Q3, NUTREND peanut cream) вероятно требовал поиска после открытия. RE11838 Q2 и RE2199 Q3 вероятно могли ответить по карточке. Это inference по товару/вопросу/ответу, не доказанная причина skip. Добавить внутренний `search_topic`/`skip_reason` trace для будущей ограниченной оценки; не включать текст вопроса/ответа, URL или provenance в логи.
 
-## Live end-to-end QA
+## Verification status
 
-Для проверки выбран RE89157 — PureGold Compact Whey Gold, salted caramel, 500 g. Официальная страница производителя соответствует title/path matcher: [Compact Whey Gold 500 g](https://www.puregoldprotein.com/hu/fo-termek/new-compact-whey-gold-feherjepor/11035). Один локальный end-to-end `/api/search` → `/api/ask` запрос через `scripts/run_local_session.py` завершился HTTP 200, attempt `succeeded`, `search_status=used`, точная запись производителя была принята. Поисковая часть заняла 849 ms, весь запрос — 11,811 ms.
-
-Вопрос был о числе порций, указанном производителем для упаковки 500 g. Модель не сообщила запрашиваемое значение и вместо этого указала, что оно не подтверждено доступным evidence. Следовательно, E2E доказал каталог → Tavily → exact-source filter → v14 answer path и безопасное воздержание, но **не** положительный buyer-facing ответ с новым фактом. Больше live-попыток в этой сессии не было. Внутренний журнал не копировался в документацию; зафиксированы только агрегированные результаты.
-
-Страница SPONSER RE1372 была запасным кандидатом, но локальный `_product_match_basis` отклоняет её англоязычный title/path для украиноязычной карточки. Для E2E она не использовалась; фильтр не ослаблялся.
+The automated suite and container smoke cover synthetic inputs, offline mocks, and the JSON/SSE routes. They do not establish readiness on a target VPS or with a live website backend. Before traffic, complete the acceptance checklist below for the chosen host architecture, MySQL TLS and grants, HTTPS proxy, journal persistence, backup/restore, and website integration. Do not use historical sample questions or source provenance as production acceptance evidence.
 
 ## Rate limit, ротация и эксплуатация
 

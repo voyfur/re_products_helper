@@ -1,87 +1,37 @@
-# Race Expert QA — вопросы о товаре
+# Race Expert Product QA backend
 
-Это отдельный проект backend для поиска товара и ответов на вопросы по его карточке. В рабочем коде активен prompt v18 (`87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f`); v17 и v12–v16 с их зафиксированными SHA-256 сохранены без изменений. Ответы GPT-6 Luna всегда на украинском, независимо от языка вопроса.
+Standalone product question-and-answer API with a local reference UI. The storefront and the website backend are separate systems and are not included here. The active assistant prompt is v18; v17 and earlier prompt files remain preserved and pinned.
 
-## Как работает
+## API for the website backend
 
-1. Поиск находит точные совпадения по model или SKU и позволяет выбрать товар, если совпадений несколько.
-2. Перед отправкой вопроса сервер повторно сверяет артикул и product_id с каталогом.
-3. Модели передаются сведения украинской карточки выбранного товара и текущий вопрос. При необходимости backend может один раз обратиться к Tavily по утверждённому allowlist.
-4. К модели допускаются только точные данные производителя/поставщика; отзывы могут подтверждать лишь анонимную субъективную тему по точному товару минимум на двух независимых одобренных платформах.
-5. Текущие вопрос, ответ и приватные metadata попытки сохраняются в отдельном SQLite-журнале. Переданная `history` — временный контекст, она не журналируется и не сохраняется как история разговора. Исходные excerpts, тексты отзывов, авторы и профили не сохраняются; buyer-facing API не выдаёт provenance.
+Use the versioned server-to-server endpoints:
 
-Каталог использует read-only запросы только к пяти таблицам карточки товара: oc_product, oc_product_description, oc_product_attribute, oc_attribute_description и oc_stock_status. Для локального запуска используется одобренный SSH-туннель через VPS-61125. MySQL TLS обязателен, но проверка его сертификата отключена только в этой локальной сессии; проверка SSH host key остаётся включена. Это не постоянная backend-конфигурация и не разрешение на staging/production.
+- `POST /api/v1/ask` returns a complete JSON answer.
+- `POST /api/v1/ask/stream` returns an SSE stream for incremental display and a typing indicator.
 
-Последняя проверка показала, что используемая read-only учётная запись имеет дополнительные разрешения сверх пяти таблиц Q&A. Код QA обращается только к перечисленным пяти таблицам. Для строгого разделения перед развёртыванием нужен отдельный пользователь MySQL с SELECT только на эти пять таблиц.
+Both accept the same `article` and current `question`; optional `history` carries up to nine earlier user/assistant messages for the same product page. Requests without history remain compatible. The body limit is 16 KiB: remove oldest whole history messages to fit and never shorten the current question. History is hidden, temporary, untrusted context and is not persisted or logged as conversation history.
 
-## Локальные доступы
+The browser should call the website's own backend. That backend stores the Product QA bearer key and calls these endpoints server-side. For SSE, proxy `text/event-stream` without buffering; the site UI handles `start`, `delta`, `replace`, `done`, and `error` events. The local reference UI demonstrates streaming and typing behavior.
 
-В `QA/.env` находятся параметры Q&A и Tavily. Запускатель читает только allowlist ключей и не исполняет `.env` как shell-код. Для локального запуска передаётся ровно один `TAVILY_API_KEY` или `TAVILY_API_KEY_FILE`; значения ключей не печатаются. `.env` и `secrets/` исключены из Git и Docker-контекста.
+See the [OpenAPI contract](docs/api/product-qa-v1.yaml), [integration handoff](docs/api/product-qa-integration.md), and [widget brief](docs/ui/product-qa-widget-brief.md).
 
-Проверенные grants, пять используемых таблиц и границы доступа собраны в [Q&A-карточке MySQL](wiki/sources/qa-mysql-readonly-access-and-product-query.md).
+## Service behavior
 
-## Запуск локально
+Product QA resolves and revalidates the exact product against the read-only catalog for every request. It uses prompt v18 and approved exact-product evidence; customer-specific health questions follow the fixed refusal rules. The API does not return source provenance. The attempt journal is separate from the temporary conversation context.
 
-Нужны Python 3.12 и установленные зависимости. Для этой папки уже подготовлен локальный `QA/.env`; запускатель безопасно читает его по allowlist.
+## Configuration and deployment
 
-~~~sh
-python3.12 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements.txt
-~~~
+The Docker image runs as a non-root user and exposes the service on port 8787. Configure MySQL TLS with trusted CA and hostname verification, read-only access to the five product-card tables, server-side provider credentials, and a separate Product QA integration key. Never put credentials in this repository or browser code.
 
-Запускайте локальное приложение из корня проекта через Q&A-only туннельный запускатель:
+Deployment artifacts are in [`deploy/`](deploy/). Follow the [production blueprint](docs/deployment/product-qa-production-blueprint.md) and [VPS install runbook](docs/deployment/product-qa-vps-runbook.md). The Nginx example disables buffering for the stream route. These files are handoff templates; this repository does not deploy them or modify the storefront.
 
-~~~sh
-.venv/bin/python scripts/run_local_session.py --env-file .env
-~~~
+## Verification
 
-Запускатель требует SSH host key в системном `known_hosts`, доступ к VPS и включённый MySQL TLS 1.2/1.3. Для этой локальной сессии он отключает проверку MySQL-сертификата; сертификат и имя MySQL endpoint не подтверждены. Это локальное исключение нельзя переносить в staging или production. Подробности и диагностика — в [runbook локального запуска](docs/test-harness/local-session-runbook.md).
+The tests use offline fixtures and mocks; they do not require live OpenAI or Tavily calls:
 
-Откройте http://127.0.0.1:8787. `/health` не обращается к базе или модели; запускатель выполняет только проверку схемы, `SELECT 1` и проверку прав на пять таблиц через `LIMIT 0`. Для ответов нужны рабочие серверные учётные данные и доступ к OpenAI. Не публикуйте локальный сервер в интернете без отдельной настройки доступа и лимитов.
-
-## API для будущего подключения сайта
-
-Будущий backend сайта Race Expert может отправлять артикул, текущий вопрос и необязательные до девяти предыдущих сообщений через `POST /api/v1/ask` (обычный JSON) или `POST /api/v1/ask/stream` (SSE). В обоих случаях Product QA заново проверяет точный товар в каталоге. История ограничена одной страницей и товаром, хранится только в памяти браузера, не показывается отдельным списком или счётчиком и очищается при смене товара/перезагрузке. Браузер сайта вызывает собственный backend; только он хранит bearer credential и вызывает Product QA. Этот checkout готовит endpoints и handoff, но backend сайта и storefront здесь не изменены. Контракт и порядок подключения: [OpenAPI v1](docs/api/product-qa-v1.yaml) и [handoff для backend-разработчика](docs/api/product-qa-integration.md). Внутренний QA UI показывает пример потокового ответа и typing-индикатора; сайт-виджет описан отдельно в [brief виджета](docs/ui/product-qa-widget-brief.md).
-
-Внешние endpoints требуют отдельный server-to-server bearer key через `PRODUCT_QA_API_KEY_FILE`. Rate limit — 60 запросов в минуту для активного ключа в одном процессе. Публичные OpenAPI/docs UI не включены. Старые `/api/search`, `/api/ask`, внутренний `/api/ask/stream`, `/` и `/static/` предназначены только для локального QA UI; публиковать можно только точные versioned `/api/v1/ask` и `/api/v1/ask/stream` через backend сайта. Отдачу SSE через Nginx нужно проксировать без buffering. Подключение к существующему HTTPS virtual host и размещение ещё не выполнялись. Схема описана в [production blueprint](docs/deployment/product-qa-production-blueprint.md), а установка — в [VPS install handoff](docs/deployment/product-qa-vps-runbook.md).
-
-В runtime настроен утверждённый стартовый allowlist exact hostnames производителей/поставщиков и review-платформ из [исследования доменов](docs/superpowers/research/2026-11-19-raceexpert-web-search-domain-research.md); factual sources ограничены брендами. `nutrend.com.ua` включён только как условный источник NUTREND. Makeup, Epicentr, SaltStick redirect и holdout бренды оставлены вне списка. Это стартовое покрытие, не аудит всех артикулов. Подключение виджета, точного API route в существующем HTTPS reverse proxy и выдача site credential выполняются на VPS; отдельная DNS-запись для API не нужна, если используется HTTPS hostname сайта.
-
-## Существующий shared staging
-
-Последний известный статус: общий тестовый стенд с Q&A v12 доступен по адресу https://n8n.raceexpert-tools.net.ua/re-products-demo/. Это не отдельная QA-копия из этой папки. Basic Auth отключён по запросу пользователя; GPT API открыт и ограничения частоты запросов нет. Запросы к нему могут расходовать OpenAI-баланс. Состояние актуально по заметкам проекта на 17.11.2026 и отдельно не проверялось в этой сессии. Не отправляйте live-запросы и не развёртывайте сюда код без отдельного задания. Подробности: raw/sources/qa-staging-boundary-2026-11-18.md.
-
-## Резервная копия журнала
-
-Для локального журнала можно создать отдельную резервную копию:
-
-~~~sh
-JOURNAL_PATH=var/qa-journal.sqlite3 python scripts/backup_journal.py
-~~~
-
-Скрипт создаёт новый файл в `var/backups/` и не перезаписывает существующие копии.
-
-## Проверка кода
-
-~~~sh
+```sh
 python -m pip install -r requirements-dev.txt
 python -m pytest -q
-~~~
+```
 
-Тесты используют фикстуры и имитации; они не обращаются к живой базе или OpenAI.
-
-## Папки проекта
-
-- app/ — Q&A API, каталог, prompt loader и журнал попыток.
-- prompts/product-assistant-system-v*.md — история Q&A prompt; v18 активен, v12–v17 сохранены.
-- evals/ — наборы и сохранённые оценки качества ответов.
-- docs/ — [краткая инструкция](docs/test-harness/qa-quick-guide.md), [история архитектуры](docs/test-harness/qa-architecture-history.md), спецификации, планы Q&A и [историческая live-проверка v11](docs/test-harness/qa-live-run-report-2026-11-13.md).
-- scripts/run_local_session.py — локальное Q&A-приложение через SSH-туннель; полный порядок — в [runbook](docs/test-harness/local-session-runbook.md).
-- scripts/backup_journal.py — ручная резервная копия SQLite-журнала.
-- scripts/report_web_search_latency.py — агрегированные p50/p95 и доля попыток с поиском без печати содержимого запросов.
-- wiki/ — рабочие знания этого проекта.
-
-В evals/runs/ файлы с названием review содержат ручные оценки ответов модели, а не отзывы покупателей. Массовый сбор отзывов в приложении отсутствует; действует только narrow exception для анонимных повторяющихся субъективных тем.
-
-Локальный интерфейс доступен на `http://127.0.0.1:8787/` через одобренный QA tunnel. Последний bounded live UI E2E на v17 прошёл: товар подтверждён через каталог, Tavily был вызван, точный источник принят, OpenAI ответил успешно; проверка подтвердила общий вывод о спортивном применении без заявления о специальной формуле для плавцов. Полный ответ занял 10,759 ms. Существующий staging остаётся отдельной средой с ранее выпущенным Q&A v12; код туда не выкладывался. DNS, storefront и production VPS не менялись.
+The synthetic container smoke is in `scripts/container_smoke.py`. Production acceptance, target-VPS architecture, TLS, database grants, backups, and website-backend integration must be verified by the operator before serving traffic.
