@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 import time
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
 from collections.abc import Sequence
@@ -332,6 +333,234 @@ class AssistantService:
             )
             self.journal.fail_attempt(attempt.attempt_id, "provider_error")
         return self.journal.get_attempt(attempt.attempt_id)
+
+    def stream(
+        self,
+        product: Product | None,
+        question: str,
+        *,
+        history: Sequence[ConversationMessage] = (),
+        request_started_at: float | None = None,
+    ) -> Iterator[dict[str, str]]:
+        if product is None:
+            raise QuestionRejected("product_required")
+        if not question.strip():
+            raise QuestionRejected("question_required")
+
+        localized = product.languages.get("uk")
+        product_context = build_model_context(product, "uk")
+        attempt = self.journal.create_attempt(
+            product_id=product.product_id,
+            article=product.article,
+            model=product.model,
+            sku=product.sku,
+            product_name=localized.name if localized else None,
+            question=question,
+        )
+        request_started = request_started_at or time.monotonic()
+        search_status = "skipped"
+        search_provider = None
+        search_latency_ms = None
+        provenance: list[dict[str, str]] = []
+        try:
+            if _EXPLICIT_OUT_OF_SCOPE_RE.search(question):
+                answer = OUT_OF_SCOPE_ANSWER
+                self._complete_stream_attempt(
+                    attempt.attempt_id, answer, search_status, search_provider,
+                    search_latency_ms, request_started, provenance,
+                )
+                yield {"type": "delta", "text": answer}
+                yield {"type": "done"}
+                return
+
+            if _is_personal_health_request(question, history):
+                answer = f"{PERSONAL_HEALTH_REFUSAL}\n\n{HEALTH_DISCLAIMER}"
+                self._complete_stream_attempt(
+                    attempt.attempt_id, answer, search_status, search_provider,
+                    search_latency_ms, request_started, provenance,
+                )
+                yield {"type": "delta", "text": answer}
+                yield {"type": "done"}
+                return
+
+            decision_stream = self.provider.decide_stream(
+                instructions=self.system_prompt,
+                product_context=product_context,
+                question=question,
+                history=history,
+            )
+            decision, model_text, streamed_text = yield from self._forward_answer_stream(
+                decision_stream
+            )
+            if not isinstance(decision, AssistantDecision):
+                raise ProviderError("provider_invalid_response")
+            if decision.product_related is not True:
+                answer = OUT_OF_SCOPE_ANSWER
+                self._complete_stream_attempt(
+                    attempt.attempt_id, answer, search_status, search_provider,
+                    search_latency_ms, request_started, provenance,
+                )
+                if streamed_text != answer:
+                    yield {"type": "replace", "answer": answer}
+                yield {"type": "done"}
+                return
+
+            if decision.search_topic is None:
+                model_answer = decision.answer or SAFE_UNSUPPORTED_ANSWER
+                health_related = decision.health_related
+            else:
+                if not isinstance(decision.search_topic, SearchTopic):
+                    raise ProviderError("provider_invalid_response")
+                evidence_text = ""
+                if self._search_is_allowed(decision.search_topic):
+                    domains = self._domains_for_topic(product, decision.search_topic)
+                    try:
+                        query = build_search_query(product, decision.search_topic)
+                    except ValueError:
+                        query = ""
+                    if not query:
+                        domains = []
+                    if domains and self.search_client is not None:
+                        search_started = time.monotonic()
+                        search_status = "failed"
+                        search_provider = "tavily"
+                        try:
+                            if self.progress_callback is not None:
+                                self.progress_callback()
+                            results = self.search_client.search(
+                                query,
+                                include_domains=domains,
+                            )
+                            search_status = "used"
+                            bundle = filter_search_results(
+                                product,
+                                results,
+                                source_types=self._source_types(decision.search_topic),
+                                fetched_at=datetime.now(timezone.utc).isoformat(
+                                    timespec="seconds"
+                                ),
+                            )
+                            evidence_text = json.dumps(
+                                bundle.model_payload(), ensure_ascii=False
+                            )
+                            provenance = [
+                                record
+                                for record in bundle.provenance_records()
+                                if all(isinstance(value, str) for value in record.values())
+                            ]
+                        except SearchProviderError:
+                            search_status = "failed"
+                        finally:
+                            search_latency_ms = max(
+                                0, round((time.monotonic() - search_started) * 1000)
+                            )
+                final_stream = self.provider.answer_with_evidence_stream(
+                    instructions=self.system_prompt,
+                    product_context=product_context,
+                    question=question,
+                    evidence=evidence_text,
+                    history=history,
+                )
+                final, model_text, streamed_text = yield from self._forward_answer_stream(
+                    final_stream
+                )
+                if not isinstance(final, StructuredAnswer):
+                    raise ProviderError("provider_invalid_response")
+                if final.product_related is not True:
+                    answer = OUT_OF_SCOPE_ANSWER
+                    self._complete_stream_attempt(
+                        attempt.attempt_id, answer, search_status, search_provider,
+                        search_latency_ms, request_started, provenance,
+                    )
+                    if streamed_text != answer:
+                        yield {"type": "replace", "answer": answer}
+                    yield {"type": "done"}
+                    return
+                model_answer = final.answer
+                health_related = final.health_related
+
+            answer = self._buyer_safe_answer(model_answer, provenance)
+            if health_related:
+                answer = f"{answer}\n\n{HEALTH_DISCLAIMER}"
+            self._complete_stream_attempt(
+                attempt.attempt_id, answer, search_status, search_provider,
+                search_latency_ms, request_started, provenance,
+            )
+            if answer != streamed_text:
+                yield {"type": "replace", "answer": answer}
+            yield {"type": "done"}
+        except ProviderError as error:
+            self._update_metadata(
+                attempt.attempt_id,
+                search_status,
+                search_provider,
+                search_latency_ms,
+                request_started,
+                provenance,
+            )
+            self.journal.fail_attempt(attempt.attempt_id, error.code)
+            yield {"type": "error", "error": "answer_unavailable"}
+        except Exception:
+            self._update_metadata(
+                attempt.attempt_id,
+                search_status,
+                search_provider,
+                search_latency_ms,
+                request_started,
+                provenance,
+            )
+            self.journal.fail_attempt(attempt.attempt_id, "provider_error")
+            yield {"type": "error", "error": "answer_unavailable"}
+
+    def _forward_answer_stream(self, provider_stream):
+        model_parts: list[str] = []
+        pending_token = ""
+        streamed_parts: list[str] = []
+
+        while True:
+            try:
+                chunk = next(provider_stream)
+            except StopIteration as finished:
+                result = finished.value
+                break
+            if not isinstance(chunk, str):
+                raise ProviderError("provider_invalid_response")
+            model_parts.append(chunk)
+            for character in chunk:
+                if character.isspace():
+                    if pending_token and not URL_OR_DOMAIN_RE.search(pending_token):
+                        streamed_parts.append(pending_token)
+                        yield {"type": "delta", "text": pending_token}
+                    pending_token = ""
+                    streamed_parts.append(character)
+                    yield {"type": "delta", "text": character}
+                else:
+                    pending_token += character
+
+        if pending_token and not URL_OR_DOMAIN_RE.search(pending_token):
+            streamed_parts.append(pending_token)
+            yield {"type": "delta", "text": pending_token}
+        return result, "".join(model_parts), "".join(streamed_parts)
+
+    def _complete_stream_attempt(
+        self,
+        attempt_id: int,
+        answer: str,
+        search_status: str,
+        search_provider: str | None,
+        search_latency_ms: int | None,
+        request_started: float,
+        provenance: list[dict[str, str]],
+    ) -> None:
+        self._update_metadata(
+            attempt_id,
+            search_status,
+            search_provider,
+            search_latency_ms,
+            request_started,
+            provenance,
+        )
+        self.journal.complete_attempt(attempt_id, answer)
 
     @staticmethod
     def _source_types(topic: SearchTopic) -> set[str]:

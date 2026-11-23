@@ -86,6 +86,10 @@ class FakeAssistant:
         self.calls = []
         self.call_kwargs = []
         self.request_started_at = None
+        self.stream_events = [
+            {"type": "delta", "text": "Відповідь за даними картки."},
+            {"type": "done"},
+        ]
 
     def submit(self, product, question, **kwargs):
         self.calls.append((product, question))
@@ -106,6 +110,12 @@ class FakeAssistant:
             model_name="gpt-6-luna",
             prompt_version="v18",
         )
+
+    def stream(self, product, question, **kwargs):
+        self.calls.append((product, question))
+        self.call_kwargs.append(kwargs)
+        self.request_started_at = kwargs.get("request_started_at")
+        yield from self.stream_events
 
 
 @pytest.fixture

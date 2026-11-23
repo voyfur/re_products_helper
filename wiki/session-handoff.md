@@ -2,21 +2,20 @@
 
 ## Active Context
 
-- Last session: `raw/sessions/2026-11-22-race-expert-qa-v18-update.md`
-- Current objective: Race Expert QA v18 update
+- Last session: `raw/sessions/2026-11-23-add-product-qa-streaming-and-typing.md`
+- Current objective: Add Product QA streaming and typing
 
 ## Current Decisions
 
-- Prompt v18 is active with the approved balanced general-sports conclusion and sport-specific limitation; v17 and its pinned hash remain unchanged.
-- The API accepts optional history with up to nine prior user/assistant messages; the current question is separate. Context is same-product/session, untrusted, non-persistent, and excluded from history logging.
-- The local UI keeps up to ten messages in page memory, clears on new product search or reload, and removes oldest whole history messages to fit 16 KiB without shortening the current question.
-- Clear dependent personal-health safety/dose follow-ups use the fixed refusal before provider calls; prior user health context includes common condition terms such as asthma.
-- Active checkout: /Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18; this is a local snapshot repository on branch codex/product-qa-v18 with no remote/upstream.
+- Keep POST /api/v1/ask as JSON and add POST /api/v1/ask/stream for SSE.
+- Typing and streamed answer are available in the local QA UI; conversation history stays hidden and volatile.
+- The site backend must proxy the stream server-side with buffering disabled and keep credentials server-side.
 
 ## Open Tasks
 
-- Integrate the versioned Product QA API with the website backend server-to-server, keeping credentials server-side and scoping history to the same product/page session.
-- Complete target-VPS image/platform selection, MySQL TLS and read-only grants, HTTPS reverse-proxy routing, persistent journal storage, backup/restore, and operational acceptance.
+- Connect the website backend to the versioned JSON or SSE endpoint; no storefront code is connected by this implementation.
+- Complete target VPS configuration and acceptance separately; no deployment was performed.
+- Provide the target Product QA repository if this local branch should be published.
 
 ## Blockers
 
@@ -24,18 +23,16 @@
 
 ## Next Action
 
-- Continue work only in /Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18 and inspect git status before making further edits.
-- Use docs/deployment/product-qa-vps-runbook.md for the separate site-backend/VPS handoff; this implementation did not deploy or connect the storefront.
+- Use docs/api/product-qa-integration.md for the site-backend handoff and docs/deployment/product-qa-vps-runbook.md for VPS acceptance.
+- Keep this branch local until a Product QA repository target is supplied.
 
 ## Relevant Pages
 
 - wiki/index.md
-- wiki/session-handoff.md
+- wiki/sources/race-expert-qa-project.md
 - wiki/syntheses/race-expert-qa-evaluation.md
 - wiki/syntheses/race-expert-qa-web-search.md
 - wiki/syntheses/race-expert-qa-production-readiness.md
-- docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md
-- docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md
-- docs/api/product-qa-v1.yaml
 - docs/api/product-qa-integration.md
+- docs/api/product-qa-v1.yaml
 - docs/deployment/product-qa-vps-runbook.md

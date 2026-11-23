@@ -311,6 +311,48 @@ textarea::placeholder {
   color: var(--color-success);
 }
 
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.typing-dots i {
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: typing-bounce 900ms ease-in-out infinite;
+}
+
+.typing-dots i:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.typing-dots i:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-0.22rem); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-dots i {
+    animation: none;
+  }
+}
+
 .candidate-list {
   display: grid;
   gap: 0.55rem;
@@ -669,54 +711,6 @@ textarea::placeholder {
   color: var(--color-text);
   font-size: 0.9rem;
   line-height: 1.65;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.conversation-transcript {
-  margin-top: 1.1rem;
-  border-top: 1px solid var(--color-border);
-  padding-top: 1rem;
-}
-
-.conversation-transcript h3 {
-  margin: 0 0 0.7rem;
-  color: #48545e;
-  font-size: 0.8rem;
-  font-weight: 750;
-}
-
-.conversation-messages {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.conversation-message {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-control);
-  background: #fff;
-  padding: 0.7rem 0.8rem;
-}
-
-.conversation-message-assistant {
-  background: #f7fafc;
-}
-
-.conversation-role {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: var(--color-muted);
-  font-size: 0.67rem;
-  font-weight: 750;
-}
-
-.conversation-content {
-  margin: 0;
-  font-size: 0.84rem;
-  line-height: 1.55;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

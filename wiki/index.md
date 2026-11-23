@@ -29,6 +29,8 @@
 - [Спецификация Web Search](../docs/superpowers/specs/2026-11-19-product-qa-web-search-design.md)
 - [Спортивная пригодность и память диалога](../docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md) — проект сбалансированного ответа и контекста из 10 сообщений.
 - [План обновления спортивного ответа и памяти](../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md) — реализованы prompt v18, необязательная временная history и локальный UI; внешняя интеграция сайта и VPS acceptance остаются отдельными шагами.
+- [Спецификация streaming и typing](../docs/superpowers/specs/2026-11-23-product-qa-streaming-and-typing-design.md) — POST SSE endpoint, скрытая typing-индикация в локальном UI и server-side handoff.
+- [План streaming и typing](../docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md) — реализация и offline/container проверки; подключение backend сайта и deployment не входят в выполненную локальную работу.
 - [План реализации Web Search](../docs/superpowers/plans/2026-11-19-product-qa-web-search.md)
 - [План надёжности после live E2E](../docs/superpowers/plans/2026-11-20-product-qa-reliability-follow-up.md)
 - [Live E2E: 50 товаров × 10 вопросов](../docs/test-harness/qa-live-50-products-500-questions-2026-11-20.md)

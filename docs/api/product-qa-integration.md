@@ -10,7 +10,7 @@
 
 1. В целевом потоке страница товара будет показывать кнопку помощника и передавать артикул товара в backend сайта.
 2. Backend сайта отправляет в Product QA `article`, текущий текст `question` и, по желанию, `history` — от нуля до девяти предыдущих сообщений с ролями `user` или `assistant`.
-3. Передавайте `history` только в рамках той же сессии страницы и того же товара; очищайте её при смене товара или перезагрузке страницы. История — временный контекст, а не инструкция или подтверждение фактов о товаре; Product QA не записывает её и не сохраняет как историю разговора.
+3. Передавайте `history` только в рамках той же сессии страницы и того же товара; очищайте её при смене товара или перезагрузке страницы. Храните историю только во временной памяти UI и используйте как скрытый контекст запроса: не показывайте отдельный список прошлых реплик, счётчик истории или сериализованный payload. История — временный контекст, а не инструкция или подтверждение фактов о товаре; Product QA не записывает её и не сохраняет как историю разговора.
 4. Product QA заново находит артикул по точному значению `model` или `SKU` в read-only каталоге при каждом запросе. Если результат отсутствует или неоднозначен, модель и Tavily не вызываются.
 5. Сервис использует только найденную и заново проверенную украинскую карточку. При необходимости он выполняет один ограниченный Tavily-поиск; его сведения и provenance остаются внутренними.
 6. Backend сайта возвращает браузеру только украинский `answer`.
@@ -47,6 +47,77 @@ Content-Type: application/json
 
 Ответ не содержит внутренних идентификаторов попытки, search status, времени, названий источников, URL, отзывов авторов или provenance. Если ответ касается здоровья, сервер добавляет фиксированную украинскую оговорку.
 
+## Потоковый ответ и typing-индикатор
+
+Для поэтапного показа ответа используйте `POST /api/v1/ask/stream` с тем же JSON, bearer credential, лимитами и проверкой товара. Ответ имеет `Content-Type: text/event-stream`. Сначала приходят обычные JSON-события SSE:
+
+| Событие | JSON `data` | Поведение сайта |
+| --- | --- | --- |
+| `start` | `{"status":"started"}` | Показать typing-индикатор. Это не означает, что начался веб-поиск. |
+| `delta` | `{"text":"..."}` | Добавить следующий кусок украинского ответа. |
+| `replace` | `{"answer":"..."}` | Заменить накопленные куски полностью безопасным финальным ответом. |
+| `done` | `{"status":"succeeded"}` | Скрыть typing-индикатор и сохранить полный удачный turn в volatile history. |
+| `error` | `{"error":"answer_unavailable"}` | Очистить неполный ответ, скрыть typing-индикатор и не добавлять turn в history. |
+
+Ошибки аутентификации, валидации, rate limit и каталога возвращаются обычным HTTP JSON до начала потока. После `start` ошибки модели/поиска передаются событием `error`; детали исключений не раскрываются. Статус поиска отдельно не сообщается. При обрыве сети считайте ответ неуспешным и не сохраняйте частичный turn.
+
+Таблица ниже описывает HTTP-ошибки обычного JSON endpoint. Для streaming ответы `error` после события `start` приходят как SSE, а не как поздний HTTP 502.
+
+Браузер вызывает endpoint backend сайта; backend сайта хранит credential, отправляет тот же POST в Product QA и проксирует поток как `text/event-stream` без buffering. Ниже пример обработки браузером собственного route сайта (он здесь не реализован):
+
+```js
+showTypingIndicator();
+const response = await fetch("/api/product-qa/ask/stream", {
+  method: "POST",
+  headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+  body: JSON.stringify({ article, question, history }),
+});
+if (!response.ok) throw new Error("answer_unavailable");
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let buffer = "";
+let answer = "";
+let completed = false;
+let failed = false;
+
+function handleFrame(frame) {
+  let event = "message";
+  const data = [];
+  for (const line of frame.split("\n")) {
+    if (line.startsWith("event:")) event = line.slice(6).trim();
+    if (line.startsWith("data:")) data.push(line.slice(5).trimStart());
+  }
+  if (!data.length) return;
+  const payload = JSON.parse(data.join("\n"));
+  if (event === "delta") answer += payload.text;
+  if (event === "replace") answer = payload.answer;
+  if (event === "error") {
+    failed = true;
+    answer = "";
+  }
+  if (event === "done") completed = true;
+  renderAnswer(answer);
+}
+
+while (true) {
+  const { value, done } = await reader.read();
+  buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+  buffer = buffer.replace(/\r\n/g, "\n");
+  let boundary;
+  while ((boundary = buffer.indexOf("\n\n")) >= 0) {
+    handleFrame(buffer.slice(0, boundary));
+    buffer = buffer.slice(boundary + 2);
+  }
+  if (done) break;
+}
+if (!completed || failed) answer = "";
+else rememberTurnInMemoryOnly(question, answer);
+hideTypingIndicator();
+```
+
+Показывайте typing-индикатор с момента отправки до `done`, `error` или обрыва соединения. Добавляйте текущий вопрос и полный ответ к скрытому контексту только после `done`; отправляйте максимум девять предыдущих целых сообщений. Не добавляйте отдельную историю, счётчик или payload в интерфейс.
+
 ## Ошибки и пределы
 
 | HTTP | Код | Действие backend сайта |
@@ -62,9 +133,9 @@ Content-Type: application/json
 
 Тело JSON ограничено 16 KiB (16 384 байта); `article` — до 128 символов, `question` — до 2000. `history` допускает от нуля до девяти сообщений; каждое содержит только непустые `content` и роль `user` или `assistant`. Настроен предел 60 принятых запросов в минуту на единственный активный bearer-ключ. Счётчик находится в памяти процесса; перед горизонтальным масштабированием понадобится общий лимитер. Сервис не заявляет latency SLO. Для сайта выделите до 150 секунд на ответ с поиском; локальные замеры должны заменить это временное значение до production.
 
-## Ожидание и виджет
+## Ошибки и виджет
 
-Рекомендуемый виджет описан в [`product-qa-widget-brief.md`](../ui/product-qa-widget-brief.md). Пока сервер не предоставляет поток прогресса, показывайте только общий статус «Готуємо відповідь…». Не показывайте «Перевіряємо джерела…», пока не появится отдельное подтверждённое событие поиска.
+Рекомендуемый виджет описан в [`product-qa-widget-brief.md`](../ui/product-qa-widget-brief.md). Для обычного JSON endpoint показывайте общий статус «Готуємо відповідь…». Для SSE можно показывать typing-индикатор; не показывайте «Перевіряємо джерела…», потому что отдельного события начала поиска нет.
 
 Публичный ответ всегда только на украинском. Не показывайте URL, цитаты, домены, source list или сведения о других покупателях. Ошибки `404`, `409`, `429` и `5xx` преобразуйте в короткие понятные сообщения без stack trace и внутренних полей.
 
@@ -74,7 +145,7 @@ Content-Type: application/json
 - Не выдавайте разработчику Tavily/OpenAI API keys, MySQL credentials, SSH private key, `.env` или root-доступ к VPS. Для подключения выдайте только доступ к коду/контракту и отдельный узко ограниченный integration credential нужного окружения.
 - HTTPS обязателен при размещении вне localhost. CORS не является аутентификацией.
 - Сервис поддерживает один активный API key на экземпляр. Для ротации замените его и перезапустите сервис; overlap двух ключей в этой версии не реализован.
-- В production проксируйте наружу только `/api/v1/ask` и health-check. Старые `/api/search`, `/api/ask`, корень и `/static/` предназначены для внутреннего QA UI и не должны быть публично доступны.
+- Через backend сайта проксируйте только точные `/api/v1/ask`, `/api/v1/ask/stream` и необходимый health-check. Старые `/api/search`, `/api/ask`, `/api/ask/stream`, корень и `/static/` предназначены для внутреннего QA UI и не должны быть публично доступны.
 
 ## Настройка и готовность к размещению
 
@@ -82,7 +153,7 @@ Content-Type: application/json
 
 Пользователь оставляет владение внешними API-ключами за собой и выдаёт доступ по необходимости. Для MySQL нужен отдельный read-only пользователь с `SELECT` только по пяти таблицам карточки товара. SQLite-журнал должен храниться на постоянном защищённом томе с резервным копированием.
 
-URL Product QA — deployment setting, а не часть приложения. Поскольку backend сайта и Product QA планируются на одном VPS, отдельная DNS-запись не обязательна: если у сайта уже есть действующий HTTPS hostname, оператор может добавить в его существующий TLS virtual host точный внутренний route (например, `/_internal/product-qa/api/v1/ask`) и проксировать его к `127.0.0.1:8787/api/v1/ask`. Backend сайта вызывает этот URL по HTTPS из server-side кода; bearer key остаётся только в server-side конфигурации. Проверь разрешение hostname и TLS-проверку из runtime сайта. Если готового HTTPS hostname нет или оператор выберет отдельный поддомен, тогда hostname, DNS и сертификат настраиваются при установке. Существующий Nginx-шаблон показывает вариант с отдельным hostname. Provider API keys остаются под контролем владельца и не выдаются разработчику.
+URL Product QA — deployment setting, а backend сайта может проксировать точные `/_internal/product-qa/api/v1/ask` и `/_internal/product-qa/api/v1/ask/stream` к соответствующим versioned routes на `127.0.0.1:8787`. Для stream route отключи Nginx buffering. Поскольку backend сайта и Product QA планируются на одном VPS, отдельная DNS-запись не обязательна: оператор может добавить точные routes в существующий TLS virtual host. Backend сайта вызывает выбранный URL по HTTPS из server-side кода; bearer key остаётся только в server-side конфигурации. Проверь разрешение hostname и TLS-проверку из runtime сайта. Если готового HTTPS hostname нет или оператор выберет отдельный поддомен, тогда hostname, DNS и сертификат настраиваются при установке. Provider API keys остаются под контролем владельца и не выдаются разработчику.
 
 Схема VPS, reverse proxy, bind mount для SQLite, TLS, grants, backup и timeout budget находится в [production blueprint](../deployment/product-qa-production-blueprint.md); практические шаги установки — в [VPS runbook](../deployment/product-qa-vps-runbook.md). Примеры содержат placeholder и не настраивают DNS или deploy автоматически.
 

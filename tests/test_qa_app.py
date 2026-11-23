@@ -1,4 +1,5 @@
 import sqlite3
+from dataclasses import replace
 
 import pytest
 
@@ -40,6 +41,10 @@ def test_health_and_html_are_available(harness):
     assert page.status_code == 200
     assert "Запитайте штучний інтелект про цей товар" in page.text
     assert "Відповідь буде українською" in page.text
+    assert 'id="typing-indicator"' in page.text
+    assert "typing-dots" in page.text
+    assert "conversation-history" not in page.text
+    assert "history-counter" not in page.text
     assert "відгук" not in page.text.lower()
     assert "/api/product-overview" not in page.text
     assert "/api/reviews" not in page.text
@@ -77,7 +82,7 @@ def test_qa_waiting_copy_is_truthful_before_search_starts(harness):
 def test_generated_openapi_matches_the_public_server_contract(harness):
     schema = harness.app.openapi()
 
-    assert set(schema["paths"]) == {"/api/v1/ask", "/health"}
+    assert set(schema["paths"]) == {"/api/v1/ask", "/api/v1/ask/stream", "/health"}
     operation = schema["paths"]["/api/v1/ask"]["post"]
     assert operation["security"] == [{"productQaBearer": []}]
     assert {"200", "401", "404", "409", "413", "422", "429", "502", "503"} <= set(
@@ -107,6 +112,11 @@ def test_generated_openapi_matches_the_public_server_contract(harness):
     assert schema["paths"]["/api/v1/ask"]["post"]["responses"]["429"]["headers"][
         "Retry-After"
     ]["schema"]["const"] == 60
+    stream_operation = schema["paths"]["/api/v1/ask/stream"]["post"]
+    assert stream_operation["security"] == [{"productQaBearer": []}]
+    assert stream_operation["responses"]["200"]["content"]["text/event-stream"][
+        "schema"
+    ]["type"] == "string"
     assert schema["components"]["securitySchemes"]["productQaBearer"] == {
         "type": "http",
         "description": "Server-side only. Storefront browser code must never receive this key.",
@@ -187,6 +197,91 @@ def test_versioned_api_accepts_optional_history_and_forwards_validated_messages(
     ]
 
 
+def test_stream_api_authenticates_revalidates_and_forwards_optional_history(harness, tmp_path):
+    client = _versioned_client(harness, tmp_path)
+    path = "/api/v1/ask/stream"
+    payload = {
+        "article": "RE0731",
+        "question": "А після тренування?",
+        "history": [{"role": "user", "content": "Я питаю про цей товар."}],
+    }
+
+    unauthorized = client.post(path, json=payload)
+    response = client.post(
+        path,
+        headers={"Authorization": "Bearer synthetic-site-key"},
+        json=payload,
+    )
+
+    assert unauthorized.status_code == 401
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert response.headers["x-accel-buffering"] == "no"
+    assert response.headers["cache-control"] == "no-store"
+    assert "event: start\ndata: {\"status\":\"started\"}" in response.text
+    assert "event: delta\ndata: {\"text\":\"Відповідь за даними картки.\"}" in response.text
+    assert "event: done\ndata: {\"status\":\"succeeded\"}" in response.text
+    assert harness.catalog.searches[-1][0] == "RE0731"
+    assert harness.assistant.call_kwargs[-1]["history"][0].content == "Я питаю про цей товар."
+
+
+def test_stream_api_returns_json_errors_before_opening_stream(harness, tmp_path):
+    client = _versioned_client(harness, tmp_path)
+    headers = {"Authorization": "Bearer synthetic-site-key"}
+
+    missing = client.post(
+        "/api/v1/ask/stream",
+        headers=headers,
+        json={"article": "UNKNOWN-ARTICLE", "question": "Який об’єм?"},
+    )
+    harness.catalog.products.append(replace(harness.catalog.products[0], product_id=999))
+    ambiguous = client.post(
+        "/api/v1/ask/stream",
+        headers=headers,
+        json={"article": "RE0731", "question": "Який об’єм?"},
+    )
+
+    assert missing.status_code == 404
+    assert missing.json() == {"error": "product_not_found"}
+    assert ambiguous.status_code == 409
+    assert ambiguous.json() == {"error": "product_selection_required"}
+
+
+def test_stream_api_sanitizes_errors_after_stream_begins(harness, tmp_path):
+    client = _versioned_client(harness, tmp_path)
+    harness.assistant.stream_events = [
+        {"type": "delta", "text": "Часткова відповідь"},
+        {"type": "error", "error": "private_provider_details"},
+    ]
+
+    response = client.post(
+        "/api/v1/ask/stream",
+        headers={"Authorization": "Bearer synthetic-site-key"},
+        json={"article": "RE0731", "question": "Який об’єм?"},
+    )
+
+    assert response.status_code == 200
+    assert "event: error\ndata: {\"error\":\"answer_unavailable\"}" in response.text
+    assert "private_provider_details" not in response.text
+
+
+def test_local_stream_route_revalidates_product_and_omits_attempt_metadata(harness):
+    response = harness.client.post(
+        "/api/ask/stream",
+        json={"article": "RE0731", "product_id": 586, "question": "Який об’єм?"},
+    )
+    stale = harness.client.post(
+        "/api/ask/stream",
+        json={"article": "RE0731", "product_id": 999, "question": "Який об’єм?"},
+    )
+
+    assert response.status_code == 200
+    assert "event: done" in response.text
+    assert "attempt_id" not in response.text
+    assert stale.status_code == 409
+    assert stale.json() == {"error": "product_selection_required"}
+
+
 @pytest.mark.parametrize(
     "history",
     (
@@ -233,9 +328,24 @@ def test_both_ask_routes_reject_bodies_over_16_kib_before_catalog_or_model_work(
             "Content-Type": "application/json",
         },
     )
+    local_stream = harness.client.post(
+        "/api/ask/stream",
+        content=body,
+        headers={"Content-Type": "application/json"},
+    )
+    versioned_stream = versioned_client.post(
+        "/api/v1/ask/stream",
+        content=body,
+        headers={
+            "Authorization": "Bearer synthetic-site-key",
+            "Content-Type": "application/json",
+        },
+    )
 
     assert local.status_code == versioned.status_code == 413
     assert local.json() == versioned.json() == {"error": "request_too_large"}
+    assert local_stream.status_code == versioned_stream.status_code == 413
+    assert local_stream.json() == versioned_stream.json() == {"error": "request_too_large"}
     assert harness.catalog.searches == []
     assert harness.assistant.calls == []
 
@@ -262,10 +372,13 @@ def test_versioned_api_authentication_and_rate_limit_are_bounded(harness, tmp_pa
         assert response.json() == {"error": "product_not_found"}
 
     limited = client.post("/api/v1/ask", headers=headers, json=payload)
+    stream_limited = client.post("/api/v1/ask/stream", headers=headers, json=payload)
 
     assert limited.status_code == 429
     assert limited.json() == {"error": "rate_limited"}
     assert limited.headers["retry-after"] == "60"
+    assert stream_limited.status_code == 429
+    assert stream_limited.json() == {"error": "rate_limited"}
     assert harness.assistant.calls == []
 
 

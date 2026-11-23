@@ -3,10 +3,10 @@ schema_version: 2
 id: "synthesis.race-expert-qa-web-search"
 type: "synthesis"
 title: "Web Search для вопросов о товаре Race Expert"
-description: "Сводка backend Web Search для Q&A; включает исторические live E2E, активный prompt v18 и необязательный временный API-контекст."
+description: "Сводка backend Web Search для Q&A; включает активный prompt v18, временную историю, JSON/SSE API и локальный потоковый UI."
 tags: ["project:race-expert", "capability:product-qa", "capability:web-search", "workflow:implementation", "topic:product-data", "tool:tavily"]
 source: {"raw_path": "raw/sources/qa-web-search-domain-research-2026-11-19.md"}
-dates: {"added_at": "2026-11-19T13:54:37+02:00", "updated_at": "2026-11-22T16:38:38+02:00"}
+dates: {"added_at": "2026-11-19T13:54:37+02:00", "updated_at": "2026-11-23T11:34:00+02:00"}
 relations: [{"type": "supports", "target": "project.race-expert-qa"}, {"type": "references", "target": "synthesis.race-expert-qa-evaluation"}]
 aliases: ["Веб-поиск Q&A", "Расширение базы знаний Q&A"]
 status: "active"
@@ -42,13 +42,13 @@ status: "active"
 
 ## Текущий статус и следующий шаг
 
-Backend содержит Tavily provider/config, ограниченные exact-product доказательства, активный prompt v18, приватные attempt metadata, `/api/v1/ask`, общий статус ожидания для локального UI, обработку ошибок, контейнер и агрегированный latency-report script. Контракт для будущего backend сайта и отдельный brief Rozetka-подобного виджета готовы. `/ready` выполняет read-only `SELECT 1` для проверки каталога; `/health` показывает liveness. Сам storefront и внешний backend сайта не менялись и пока не подключены.
+Backend содержит Tavily provider/config, ограниченные exact-product доказательства, активный prompt v18, приватные attempt metadata, JSON `POST /api/v1/ask` и SSE `POST /api/v1/ask/stream`. JSON endpoint оставлен совместимым. Локальный UI показывает typing-индикатор и части ответа; история не отображается и живёт только в памяти страницы. Streaming и typing проверены offline, на синтетическом browser preview и в контейнере с отключённой сетью. Контракт для будущего backend сайта и отдельный brief Rozetka-подобного виджета готовы. `/ready` выполняет read-only `SELECT 1` для проверки каталога; `/health` показывает liveness. Сам storefront и внешний backend сайта не менялись и пока не подключены.
 
 `/api/v1/ask` повторно разрешает точный товар на каждом запросе и принимает необязательное поле `history` с 0–9 предыдущими `user`/`assistant` сообщениями; старые клиенты без него продолжают работать. Общий предел JSON body — 16 384 байта: отправитель удаляет самые старые целые history messages, если нужно освободить место, и не сокращает текущий вопрос. Локальный UI держит не более 10 сообщений всего в памяти вкладки и очищает их при новом поиске товара или перезагрузке. Backend передаёт прошлые реплики модели как недоверенный контекст, а не источник фактов или инструкции; историю не логирует и не сохраняет. Зависимый личный health/safety follow-up учитывает только прошлое сообщение пользователя и сохраняет фиксированный отказ без дозировки.
 
 Prompt v18 добавляет сбалансированный ответ о спортивном применении: когда точный источник подтверждает общее назначение для активных спортсменов/после тренировки, но не специальное применение в названном спорте, ответ должен содержать обе части. Не выводить из общего назначения личную безопасность, дозировку или эффект.
 
-На 22 ноября focused offline tests прошли: 88 passed; полный suite: 195 passed и 4009 subtests. Container image `race-expert-product-qa:v18-check` собран локально, smoke прошёл с `--network none` и synthetic dependencies, подтвердив hashes v12–v18 и маршруты health/ready/ask. Локальная browser acceptance использовала только временный mock; платные OpenAI/Tavily вызовы, storefront/backend сайта и VPS не затрагивались.
+На 23 ноября focused offline tests прошли: 97 passed; полный suite: 216 passed и 4009 subtests. Локальный image `race-expert-product-qa:stream-local-check` собран с `--network=none`; smoke прошёл с `--network none` и synthetic dependencies, подтвердив prompt hashes v12–v18, `/health`, `/ready`, JSON ask и SSE ask. Browser preview проверил появление/скрытие typing и сборку частей ответа на synthetic stream. Платные OpenAI/Tavily вызовы, storefront/backend сайта, staging и VPS не затрагивались.
 
 Пользователь утвердил стартовый набор hostnames из исследования; `SOURCE_REGISTRY` теперь перечисляет разрешённые hostnames без wildcard и ограничивает factual domains по брендам. Для SPONSER добавлены `sponser.com.ua` и `sportpro.com.ua`; `nutrend.com.ua` разрешён только для NUTREND как условный, self-claimed поставщик. Для отзывов разрешены `fit.rozetka.com.ua` и `prom.ua`, Rozetka aliases объединены в одну независимую группу. Makeup, Epicentr, SaltStick redirect и holdout бренды не включены. Набор не покрывает каждый артикул каталога.
 

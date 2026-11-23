@@ -16,11 +16,14 @@ const questionCounter = document.querySelector("#question-counter");
 const askButton = document.querySelector("#ask-button");
 const questionMessage = document.querySelector("#question-message");
 const latestAnswer = document.querySelector("#latest-answer");
+const typingIndicator = document.querySelector("#typing-indicator");
 const suggestionChips = document.querySelectorAll(".suggestion-chip");
 
 let selectedProduct = null;
 let searchToken = 0;
 let conversationHistory = [];
+let activeAnswerText = null;
+let activeAskController = null;
 
 function setMessage(node, text, kind = "") {
   node.textContent = text;
@@ -52,6 +55,9 @@ function productCodeLine(product) {
 }
 
 function renderProduct(product) {
+  if (!selectedProduct || selectedProduct.product_id !== product.product_id) {
+    conversationHistory = [];
+  }
   selectedProduct = product;
   const card = ukrainianCard(product);
   productPanel.hidden = false;
@@ -79,6 +85,9 @@ function renderProduct(product) {
   questionInput.disabled = false;
   askButton.disabled = false;
   latestAnswer.hidden = true;
+  latestAnswer.replaceChildren();
+  activeAnswerText = null;
+  typingIndicator.hidden = true;
   questionInput.value = "";
   updateQuestionCounter();
   setMessage(questionMessage, "");
@@ -106,8 +115,11 @@ function renderCandidates(products) {
 
 async function searchProduct(article) {
   const token = ++searchToken;
+  if (activeAskController) {
+    activeAskController.abort();
+    activeAskController = null;
+  }
   conversationHistory = [];
-  renderTranscript();
   selectedProduct = null;
   productPanel.hidden = true;
   candidateList.replaceChildren();
@@ -164,34 +176,66 @@ suggestionChips.forEach((chip) => {
   });
 });
 
-function renderAnswer(attempt) {
+function prepareAnswer() {
+  if (activeAnswerText) return;
   latestAnswer.replaceChildren();
-  latestAnswer.dataset.status = attempt.status;
+  latestAnswer.dataset.status = "succeeded";
   latestAnswer.hidden = false;
   latestAnswer.append(
-    textElement("p", "answer-kicker", attempt.status === "succeeded" ? "ВІДПОВІДЬ" : "СТАН ЗАПИТУ"),
-    textElement(
-      "p",
-      "answer-text",
-      attempt.answer || "Запит збережено, але відповідь отримати не вдалося. Спробуйте ще раз.",
-    ),
+    textElement("p", "answer-kicker", "ВІДПОВІДЬ"),
+    textElement("p", "answer-text", ""),
   );
+  activeAnswerText = latestAnswer.querySelector(".answer-text");
 }
 
-function renderTranscript() {
-  const transcript = document.querySelector("#conversation-transcript");
-  const messages = document.querySelector("#conversation-messages");
-  messages.replaceChildren();
-  conversationHistory.forEach((message) => {
-    const item = document.createElement("li");
-    item.className = "conversation-message conversation-message-" + message.role;
-    item.append(
-      textElement("span", "conversation-role", message.role === "user" ? "Ви" : "Помічник"),
-      textElement("p", "conversation-content", message.content),
-    );
-    messages.append(item);
-  });
-  transcript.hidden = conversationHistory.length === 0;
+function appendAnswerDelta(text) {
+  prepareAnswer();
+  activeAnswerText.textContent += text;
+}
+
+function replaceAnswer(answer) {
+  prepareAnswer();
+  activeAnswerText.textContent = answer;
+}
+
+function clearPartialAnswer() {
+  latestAnswer.replaceChildren();
+  latestAnswer.hidden = true;
+  activeAnswerText = null;
+}
+
+async function readSseStream(response, onEvent) {
+  if (!response.body || !response.body.getReader) {
+    throw new Error("answer_unavailable");
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  function dispatchFrame(frame) {
+    let eventName = "message";
+    const dataLines = [];
+    frame.split("\n").forEach((line) => {
+      if (line.startsWith("event:")) eventName = line.slice(6).trim();
+      if (line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());
+    });
+    if (!dataLines.length) return;
+    onEvent(eventName, JSON.parse(dataLines.join("\n")));
+  }
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    buffer = buffer.replace(/\r\n/g, "\n");
+    let boundary = buffer.indexOf("\n\n");
+    while (boundary >= 0) {
+      dispatchFrame(buffer.slice(0, boundary));
+      buffer = buffer.slice(boundary + 2);
+      boundary = buffer.indexOf("\n\n");
+    }
+    if (done) break;
+  }
+  if (buffer.trim()) dispatchFrame(buffer);
 }
 
 function askRequestBody(question) {
@@ -213,21 +257,28 @@ questionForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const question = questionInput.value.trim();
   if (!selectedProduct || !question) return;
+  const submittedProductId = selectedProduct.product_id;
+  const controller = new AbortController();
+  activeAskController = controller;
 
   askButton.disabled = true;
   questionInput.disabled = true;
   searchButton.disabled = true;
   latestAnswer.hidden = true;
+  latestAnswer.replaceChildren();
+  activeAnswerText = null;
+  typingIndicator.hidden = false;
   setMessage(questionMessage, "Готуємо відповідь про вибраний товар…");
 
   try {
-    const response = await fetch("/api/ask", {
+    const response = await fetch("/api/ask/stream", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
       body: askRequestBody(question),
+      signal: controller.signal,
     });
-    const body = await response.json();
     if (!response.ok) {
+      const body = await response.json();
       const messages = {
         product_selection_required: "Вибраний товар змінився. Знайдіть його ще раз.",
         product_not_found: "Товар більше не знайдено. Виконайте пошук ще раз.",
@@ -236,23 +287,47 @@ questionForm.addEventListener("submit", async (event) => {
       setMessage(questionMessage, messages[body.error] || "Не вдалося надіслати запитання. Спробуйте ще раз.", "error");
       return;
     }
-    renderAnswer(body.attempt);
-    if (body.attempt.status === "succeeded" && body.attempt.answer) {
+    if (!(response.headers.get("content-type") || "").includes("text/event-stream")) {
+      throw new Error("answer_unavailable");
+    }
+    let completed = false;
+    let failed = false;
+    await readSseStream(response, (eventName, payload) => {
+      if (eventName === "delta" && typeof payload.text === "string") {
+        appendAnswerDelta(payload.text);
+      } else if (eventName === "replace" && typeof payload.answer === "string") {
+        replaceAnswer(payload.answer);
+      } else if (eventName === "done" && payload.status === "succeeded") {
+        completed = true;
+      } else if (eventName === "error") {
+        failed = true;
+        clearPartialAnswer();
+      }
+    });
+    if (failed || !completed) {
+      clearPartialAnswer();
+      setMessage(questionMessage, "Не вдалося отримати відповідь. Спробуйте ще раз.", "error");
+      return;
+    }
+    if (!selectedProduct || selectedProduct.product_id !== submittedProductId) return;
+    const answer = activeAnswerText ? activeAnswerText.textContent : "";
+    if (answer) {
       conversationHistory.push(
         { role: "user", content: question },
-        { role: "assistant", content: body.attempt.answer },
+        { role: "assistant", content: answer },
       );
       conversationHistory = conversationHistory.slice(-10);
-      renderTranscript();
     }
-    setMessage(
-      questionMessage,
-      body.attempt.status === "succeeded" ? "Готово." : "Не вдалося отримати відповідь.",
-      body.attempt.status === "succeeded" ? "success" : "error",
-    );
-  } catch {
+    setMessage(questionMessage, "Готово.", "success");
+  } catch (error) {
+    if (error.name === "AbortError") return;
+    clearPartialAnswer();
     setMessage(questionMessage, "Не вдалося зв’язатися із сервісом. Перевірте підключення й повторіть спробу.", "error");
   } finally {
+    if (activeAskController === controller) activeAskController = null;
+    if (selectedProduct && selectedProduct.product_id === submittedProductId) {
+      typingIndicator.hidden = true;
+    }
     questionInput.disabled = !selectedProduct;
     askButton.disabled = !selectedProduct;
     searchButton.disabled = false;

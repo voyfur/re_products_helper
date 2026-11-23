@@ -1,5 +1,12 @@
 # Wiki log
 
+## 2026-11-23 — Добавлены SSE streaming API и typing UI
+
+- JSON `POST /api/v1/ask` сохранён, добавлен `POST /api/v1/ask/stream` с SSE; локальный QA-интерфейс показывает typing и ответ по мере получения.
+- В handoff задокументированы события потока и требования server-side proxy, включая отключение buffering. Сайт не подключался; VPS/staging/production deploy не выполнялись.
+- Обновлены Wiki-карточки проекта, оценки, Web Search и production readiness. В Wiki не добавлялись тексты пользовательских вопросов/ответов, source provenance или секреты.
+- Проверки: focused 97 passed; полный offline suite 216 passed, 4009 subtests; container smoke без сети прошёл на synthetic dependencies; prompt v17 hash сохранён.
+
 ## 2026-11-18 — отделён проект Race Expert QA
 
 - Создан отдельный Q&A-проект в папке QA.
@@ -179,4 +186,10 @@
 
 - Raw: `raw/sessions/2026-11-22-race-expert-qa-v18-update.md`
 - Tags: `activity:implementation`, `status:completed`, `project:race-expert-qa`, `task:product-qa-v18`, `component:api`, `component:local-ui`, `component:prompt`, `topic:temporary-conversation-history`, `file:AGENTS.md`, `file:README.md`, `file:Dockerfile`, `file:app/assistant.py`, `file:app/conversation.py`, `file:app/journal.py`, `file:app/main.py`, `file:app/openai_client.py`, `file:app/security.py`, `file:app/static/app.css`, `file:app/static/app.js`, `file:app/templates/index.html`, `file:docs/api/product-qa-integration.md`, `file:docs/api/product-qa-v1.yaml`, `file:docs/deployment/product-qa-vps-runbook.md`, `file:prompts/product-assistant-system-v18.md`, `file:scripts/container_smoke.py`, `file:tests/conftest.py`, `file:tests/test_conversation_history.py`, `file:tests/test_journal.py`, `file:tests/test_qa_app.py`, `file:tests/test_web_search.py`, `file:wiki/index.md`, `file:wiki/syntheses/race-expert-qa-evaluation.md`, `file:wiki/syntheses/race-expert-qa-web-search.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/session-handoff.md`, `file:wiki/log.md`, `file:wiki/session-index.jsonl`, `file:wiki/content-index.jsonl`, `file:raw/sessions/2026-11-22-race-expert-qa-v18-update.md`
+- Status: `completed`
+
+## [2026-11-23] session | Add Product QA streaming and typing
+
+- Raw: `raw/sessions/2026-11-23-add-product-qa-streaming-and-typing.md`
+- Tags: `activity:implementation`, `status:completed`, `project:race-expert`, `task:product-qa-streaming`, `component:product-qa-api`, `component:local-qa-ui`, `topic:sse`, `file:app/main.py`, `file:app/assistant.py`, `file:app/openai_client.py`, `file:app/static/app.js`, `file:docs/api/product-qa-integration.md`, `file:docs/api/product-qa-v1.yaml`, `file:tests/test_streaming.py`, `file:wiki/session-handoff.md`
 - Status: `completed`

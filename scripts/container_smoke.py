@@ -79,6 +79,17 @@ class _Assistant:
     ) -> Any:
         return SimpleNamespace(status="succeeded", answer="Контейнер smoke-проверен.")
 
+    @staticmethod
+    def stream(
+        product: Product,
+        question: str,
+        *,
+        request_started_at: float,
+        history: Any = (),
+    ):
+        yield {"type": "delta", "text": "Контейнер smoke-проверен."}
+        yield {"type": "done"}
+
 
 async def _request(app: Any, method: str, path: str, body: bytes = b"", headers=()) -> tuple[int, bytes]:
     incoming = [{"type": "http.request", "body": body, "more_body": False}]
@@ -87,7 +98,7 @@ async def _request(app: Any, method: str, path: str, body: bytes = b"", headers=
     async def receive():
         if incoming:
             return incoming.pop(0)
-        return {"type": "http.disconnect"}
+        await asyncio.Event().wait()
 
     async def send(message):
         sent.append(message)
@@ -150,21 +161,44 @@ def main() -> None:
         {"article": PRODUCT.article, "question": "Який це товар?"},
         ensure_ascii=False,
     ).encode("utf-8")
-    ask_status, _ = asyncio.run(
+    headers = [
+        (b"authorization", b"Bearer synthetic-container-smoke-key"),
+        (b"content-type", b"application/json"),
+    ]
+    ask_status, ask_body = asyncio.run(
         _request(
             app,
             "POST",
             "/api/v1/ask",
             payload,
-            headers=[
-                (b"authorization", b"Bearer synthetic-container-smoke-key"),
-                (b"content-type", b"application/json"),
-            ],
+            headers=headers,
         )
     )
-    if (health_status, ready_status, ask_status) != (200, 200, 200):
+    stream_status, stream_body = asyncio.run(
+        _request(
+            app,
+            "POST",
+            "/api/v1/ask/stream",
+            payload,
+            headers=headers,
+        )
+    )
+    stream_text = stream_body.decode("utf-8")
+    if (health_status, ready_status, ask_status, stream_status) != (200, 200, 200, 200):
         raise AssertionError("container_route_smoke_failed")
-    print("container_smoke=passed prompts=v12,v13,v14,v15,v16,v17,v18 health=200 ready=200 ask=200")
+    if json.loads(ask_body) != {
+        "status": "succeeded",
+        "answer": "Контейнер smoke-проверен.",
+    }:
+        raise AssertionError("container_json_contract_failed")
+    if not all(f"event: {event}\n" in stream_text for event in ("start", "delta", "done")):
+        raise AssertionError("container_stream_contract_failed")
+    if "attempt_id" in stream_text or "source_metadata" in stream_text:
+        raise AssertionError("container_stream_private_data_leaked")
+    print(
+        "container_smoke=passed prompts=v12,v13,v14,v15,v16,v17,v18 "
+        "health=200 ready=200 ask_json=200 ask_stream=200"
+    )
 
 
 if __name__ == "__main__":

@@ -6,8 +6,8 @@
     <meta name="color-scheme" content="light">
     <meta name="theme-color" content="#3675b3">
     <title>Race Expert — запитання про товар</title>
-    <link rel="stylesheet" href="/static/app.css?v=qa-v2">
-    <script src="/static/app.js?v=qa-v2" defer></script>
+    <link rel="stylesheet" href="/static/app.css?v=qa-v4">
+    <script src="/static/app.js?v=qa-v4" defer></script>
   </head>
   <body>
     <div class="topline">
@@ -129,16 +129,11 @@
               </button>
             </div>
           </form>
+          <div id="typing-indicator" class="typing-indicator" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <span>Помічник формує відповідь</span>
+            <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
           <article id="latest-answer" class="answer" aria-live="polite" hidden></article>
-          <section
-            id="conversation-transcript"
-            class="conversation-transcript"
-            aria-labelledby="conversation-title"
-            hidden
-          >
-            <h3 id="conversation-title">Поточний діалог</h3>
-            <ol id="conversation-messages" class="conversation-messages" aria-live="polite"></ol>
-          </section>
         </section>
       </section>
     </main>

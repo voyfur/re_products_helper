@@ -88,18 +88,36 @@ location = /_internal/product-qa/api/v1/ask {
     proxy_send_timeout 15s;
     proxy_read_timeout 145s;
 }
+
+location = /_internal/product-qa/api/v1/ask/stream {
+    if ($request_method != POST) { return 405; }
+    limit_req zone=product_qa_edge burst=20 nodelay;
+    limit_req_status 429;
+    access_log off;
+    proxy_pass http://127.0.0.1:8787/api/v1/ask/stream;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_set_header Host $host;
+    proxy_set_header Authorization $http_authorization;
+    proxy_buffering off;
+    proxy_cache off;
+    proxy_connect_timeout 5s;
+    proxy_send_timeout 15s;
+    proxy_read_timeout 145s;
+}
 ```
 
-Добавь `limit_req_zone` из отдельного Nginx-примера в `http {}`. Site backend использует `https://<действующий-host>/_internal/product-qa/api/v1/ask`; проверь разрешение hostname и сертификат из его runtime. Для другого hostname используй отдельный-host вариант ниже.
+Добавь `limit_req_zone` из отдельного Nginx-примера в `http {}`. Site backend вызывает одну из двух точных versioned ручек через HTTPS; для `ask/stream` отключи buffering. Проверь разрешение hostname и сертификат из runtime сайта. Для другого hostname используй отдельный-host вариант ниже.
 
 Если оператор выбирает отдельный API hostname, создай DNS A/AAAA записи, получи TLS сертификат и замени `api.example.com` и certificate paths в Nginx примере. Включи `limit_req_zone` в контекст `http {}`; `server {}` блоки помести в обычный Nginx virtual host. Периметр должен открывать только HTTPS API, health check и необходимые ACME/redirect порты.
 
 Для отдельного hostname проксируй только:
 
 - `POST /api/v1/ask`
+- `POST /api/v1/ask/stream`
 - `GET /health`
 
-`/ready`, `/api/search`, `/api/ask`, корень, `/static/` и любые другие пути оставь недоступными снаружи. Не включай access logs с body, Authorization header, вопросом, ответом или source metadata.
+`/ready`, `/api/search`, `/api/ask`, `/api/ask/stream`, корень, `/static/` и любые другие пути оставь недоступными снаружи. Для streaming location установи `proxy_buffering off`, `proxy_cache off`, `proxy_http_version 1.1` и достаточный read timeout. Не включай access logs с body, Authorization header, вопросом, ответом или source metadata.
 
 ## 5. Запустить контейнер
 
@@ -125,7 +143,7 @@ docker compose -f deploy/compose.production.yaml exec -T product-qa \
 
 ## 6. Подключить backend сайта
 
-Backend сайта конфигурирует финальный URL `https://<выбранный-host>/api/v1/ask` и получает отдельный Product QA bearer key из server-side secret store. Браузер вызывает только backend сайта; ключ остаётся server-side и не передаётся браузеру. В Product QA отправляй обязательные `article` и текущий `question`, а также необязательную `history`:
+Backend сайта выбирает `POST /api/v1/ask` для полного JSON-ответа или `POST /api/v1/ask/stream` для SSE-потока. Backend использует HTTPS URL `https://<выбранный-host>/api/v1/ask[/stream]` и отдельный Product QA bearer key из server-side secret store. Браузер вызывает только backend сайта; ключ остаётся server-side и не передаётся браузеру. В Product QA отправляй обязательные `article` и текущий `question`, а также необязательную `history`:
 
 ```json
 {
@@ -138,9 +156,9 @@ Backend сайта конфигурирует финальный URL `https://<�
 }
 ```
 
-`history` можно опустить для совместимости со старыми клиентами. Если она передаётся, это от нуля до девяти предыдущих сообщений с ролями `user`/`assistant` только из той же сессии страницы и того же товара. Сбрасывай её при смене товара или перезагрузке страницы. История — временный контекст: сервис не доверяет ей как инструкции или фактам о товаре и не записывает/сохраняет её как историю разговора.
+`history` можно опустить для совместимости со старыми клиентами. Если она передаётся, это от нуля до девяти предыдущих сообщений с ролями `user`/`assistant` только из той же сессии страницы и того же товара. Сбрасывай её при смене товара или перезагрузке страницы. Держи её скрытой в интерфейсе без отдельного transcript/counter и используй только как недоверенный контекст; сервис не считает её инструкцией или фактом о товаре и не сохраняет отдельно как историю разговора.
 
-JSON-тело ограничено 16 384 байтами. Если сериализованный запрос превышает лимит, backend сайта удаляет самые старые сообщения `history` целиком, пока запрос не поместится; текущий `question` не обрезается.
+JSON-тело для обоих endpoints ограничено 16 384 байтами. Если сериализованный запрос превышает лимит, backend сайта удаляет самые старые сообщения `history` целиком, пока запрос не поместится; текущий `question` не обрезается. Для SSE backend сайта проксирует `Content-Type: text/event-stream` без buffering; браузер читает поток через `fetch` POST, показывает typing-индикатор, добавляет `delta`, заменяет ответ по `replace` и сохраняет turn только по `done`. На `error` или обрыве соединения отбрось частичный ответ и скрой typing.
 
 Не отправляй `product_id`, цену, корзину, заказы, buyer profile/identity, разговоры из других товаров или сессий либо товарный context от браузера как подтверждённый. Сервис заново разрешает артикул и проверяет точный товар на каждом запросе. Не передавай backend-разработчику Tavily/OpenAI/DB/SSH credentials.
 
@@ -166,7 +184,7 @@ docker compose -f deploy/compose.production.yaml exec -T product-qa \
 - `/ready` отвечает только внутри VPS; публичны только разрешённые Nginx routes.
 - Вызов сайта проходит по HTTPS через действующий hostname и certificate verification; отдельный API hostname/DNS/TLS требуется только если существующий virtual host использовать нельзя. Firewall и MySQL allowlist ограничены.
 - `/data` persistent, права владельца `10001:10001`, backup зашифрован вне VPS, restore drill записан.
-- Backend сайта хранит Product QA bearer key server-side и вызывает только `/api/v1/ask`; если он передаёт `history`, то только в той же product page session.
+- Backend сайта хранит Product QA bearer key server-side и вызывает только `/api/v1/ask` или `/api/v1/ask/stream`; если он передаёт `history`, то только в той же product page session.
 - Retention, timeout/SLO, rate-limit expectation и key rotation задокументированы владельцем/оператором до рабочего трафика.
 
 Этот runbook готовит разработчика к установке на выбранном VPS. Команды здесь не выполнялись на production host; storefront, DNS, staging и deploy не менялись.

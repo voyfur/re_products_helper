@@ -648,10 +648,25 @@ class FakeProvider:
         self.decision_kwargs.append(kwargs)
         return self.decision
 
+    def decide_stream(self, **kwargs):
+        self.decision_calls += 1
+        self.decision_kwargs.append(kwargs)
+        if self.decision.answer:
+            yield self.decision.answer
+        return self.decision
+
     def answer_with_evidence(self, *, evidence, **kwargs):
         self.answer_calls += 1
         self.answer_kwargs.append(kwargs)
         self.evidence = evidence
+        return self.final_answer
+
+    def answer_with_evidence_stream(self, *, evidence, **kwargs):
+        self.answer_calls += 1
+        self.answer_kwargs.append(kwargs)
+        self.evidence = evidence
+        if self.final_answer and self.final_answer.answer:
+            yield self.final_answer.answer
         return self.final_answer
 
 
@@ -665,6 +680,164 @@ class FakeSearchClient:
         if isinstance(self.results, Exception):
             raise self.results
         return self.results
+
+
+def _stream_payload(events):
+    return [event for event in events if event["type"] in {"delta", "replace"}]
+
+
+def _stream_text(events):
+    answer = ""
+    for event in events:
+        if event["type"] == "delta":
+            answer += event["text"]
+        elif event["type"] == "replace":
+            answer = event["answer"]
+    return answer
+
+
+def test_assistant_streams_direct_answer_and_journals_complete_result(tmp_path):
+    provider = FakeProvider(
+        AssistantDecision(answer="Відповідь за точною карткою.", health_related=False)
+    )
+    journal = Journal(tmp_path / "journal.sqlite3")
+    service = AssistantService(
+        journal,
+        provider,
+        system_prompt="test prompt",
+        search_client=FakeSearchClient([]),
+    )
+
+    events = list(service.stream(nutrend_product(), "Підтвердіть назву товару"))
+    attempt = journal.get_attempt(1)
+
+    assert _stream_text(events) == "Відповідь за точною карткою."
+    assert any(event["type"] == "delta" for event in events)
+    assert events[-1] == {"type": "done"}
+    assert attempt.status == "succeeded"
+    assert attempt.answer == "Відповідь за точною карткою."
+
+
+def test_assistant_stream_redirects_explicitly_unrelated_question_before_model(tmp_path):
+    provider = FakeProvider(
+        AssistantDecision(answer="Токіо — столиця Японії.", health_related=False)
+    )
+    service = AssistantService(
+        Journal(tmp_path / "journal.sqlite3"),
+        provider,
+        system_prompt="test prompt",
+        search_client=FakeSearchClient([]),
+    )
+
+    events = list(
+        service.stream(nutrend_product(), "Не про цей товар: яка столиця Японії?")
+    )
+
+    assert _stream_text(events) == (
+        "Я можу допомогти з питаннями про цей товар, його характеристики або застосування."
+    )
+    assert events[-1] == {"type": "done"}
+    assert provider.decision_calls == 0
+
+
+def test_assistant_stream_searches_before_evidence_answer_and_hides_provenance(tmp_path):
+    provider = FakeProvider(
+        AssistantDecision(search_topic=SearchTopic.PRODUCT_FACTS),
+        StructuredAnswer("Виробник підтверджує загальне використання після тренування.", False),
+    )
+    search_client = FakeSearchClient([exact_nutrend_result()])
+    journal = Journal(tmp_path / "journal.sqlite3")
+    service = AssistantService(
+        journal,
+        provider,
+        system_prompt="test prompt",
+        search_client=search_client,
+    )
+
+    events = list(service.stream(nutrend_product(), "Чи можна використовувати після тренування?"))
+    attempt = journal.get_attempt(1)
+
+    assert len(search_client.calls) == 1
+    assert _stream_text(events) == attempt.answer
+    assert attempt.search_status == "used"
+    assert "nutrend.eu" not in json.dumps(events)
+    assert "source_metadata_json" not in json.dumps(events)
+    assert provider.answer_calls == 1
+
+
+def test_assistant_stream_uses_fixed_health_refusal_for_prior_health_context(tmp_path):
+    provider = FakeProvider(
+        AssistantDecision(answer="Приймайте 5 г на день.", health_related=False)
+    )
+    service = AssistantService(
+        Journal(tmp_path / "journal.sqlite3"),
+        provider,
+        system_prompt="test prompt",
+        search_client=FakeSearchClient([]),
+    )
+
+    events = list(
+        service.stream(
+            nutrend_product(),
+            "Чи безпечно мені його вживати?",
+            history=[ConversationMessage(role="user", content="У мене астма.")],
+        )
+    )
+    answer = _stream_text(events)
+
+    assert "Не можу визначати особисту безпеку продукту або дозу" in answer
+    assert "5 г" not in answer
+    assert answer.endswith(HEALTH_DISCLAIMER)
+    assert provider.decision_calls == 0
+
+
+def test_assistant_stream_replaces_unsafe_source_domain_without_streaming_it(tmp_path):
+    provider = FakeProvider(
+        AssistantDecision(answer="Деталі є на nutrend.eu/product.", health_related=False)
+    )
+    service = AssistantService(
+        Journal(tmp_path / "journal.sqlite3"),
+        provider,
+        system_prompt="test prompt",
+        search_client=FakeSearchClient([]),
+    )
+
+    events = list(service.stream(nutrend_product(), "Де знайти деталі?"))
+    delta_text = "".join(
+        event["text"] for event in events if event["type"] == "delta"
+    )
+
+    assert "nutrend.eu" not in delta_text
+    assert events[-2] == {"type": "replace", "answer": SAFE_UNSUPPORTED_ANSWER}
+    assert _stream_text(events) == SAFE_UNSUPPORTED_ANSWER
+
+
+def test_assistant_stream_clears_partial_answer_with_sanitized_error(tmp_path):
+    provider = FakeProvider(
+        AssistantDecision(answer="Часткова відповідь", health_related=False)
+    )
+
+    def fail_after_partial(**_kwargs):
+        yield "Часткова відповідь "
+        raise ProviderError("provider_error")
+
+    provider.decide_stream = fail_after_partial
+    journal = Journal(tmp_path / "journal.sqlite3")
+    service = AssistantService(
+        journal,
+        provider,
+        system_prompt="test prompt",
+        search_client=FakeSearchClient([]),
+    )
+
+    events = list(service.stream(nutrend_product(), "Який об’єм?"))
+    attempt = journal.get_attempt(1)
+
+    assert any(event["type"] == "delta" for event in events)
+    assert events[-1] == {"type": "error", "error": "answer_unavailable"}
+    assert attempt.status == "error"
+    assert attempt.answer is None
+    assert "provider_error" not in json.dumps(events)
 
 
 def test_assistant_searches_once_and_keeps_provenance_out_of_buyer_payload(tmp_path):

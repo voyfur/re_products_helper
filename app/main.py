@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import logging
 import threading
 import time
@@ -13,6 +14,7 @@ from typing import Any, Literal
 from fastapi import Depends, FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.sse import EventSourceResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
@@ -115,6 +117,19 @@ _VERSIONED_ASK_RESPONSES = {
     },
     502: {"model": ApiErrorResponse, "description": "A safe answer could not be generated."},
     503: {"model": ApiErrorResponse, "description": "The catalog or service is unavailable."},
+}
+_VERSIONED_STREAM_RESPONSES = {
+    **{
+        status: response
+        for status, response in _VERSIONED_ASK_RESPONSES.items()
+        if status != 502
+    },
+    200: {
+        "description": (
+            "SSE events: start, delta, replace, done, or error. Event data is JSON."
+        ),
+        "content": {"text/event-stream": {"schema": {"type": "string"}}},
+    },
 }
 
 
@@ -278,6 +293,37 @@ def create_app(
             return JSONResponse({"error": "question_unavailable"}, status_code=503)
         return JSONResponse({"attempt": _attempt_payload(attempt)})
 
+    @app.post("/api/ask/stream", include_in_schema=False, response_model=None)
+    def ask_local_stream(payload: AskRequest) -> EventSourceResponse | JSONResponse:
+        request_started_at = time.monotonic()
+        article = payload.article.strip()
+        question = payload.question.strip()
+        if not article or not question:
+            return JSONResponse({"error": "invalid_request"}, status_code=422)
+        try:
+            active = get_services()
+            with active["catalog"].connection_scope() as connection:
+                products = active["catalog"].search_products(
+                    article, connection=connection
+                )
+                product = next(
+                    (item for item in products if item.product_id == payload.product_id),
+                    None,
+                )
+                if product is None:
+                    error = "product_not_found" if not products else "product_selection_required"
+                    return JSONResponse({"error": error}, status_code=409)
+        except Exception as error:
+            _log_catalog_unavailable(error)
+            return JSONResponse({"error": "catalog_unavailable"}, status_code=503)
+        events = active["assistant"].stream(
+            product,
+            question,
+            history=payload.history,
+            request_started_at=request_started_at,
+        )
+        return _sse_response(events)
+
     @app.post(
         "/api/v1/ask",
         response_model=AskResponse,
@@ -344,7 +390,101 @@ def create_app(
             return JSONResponse({"error": "answer_unavailable"}, status_code=502)
         return JSONResponse({"status": "succeeded", "answer": attempt.answer})
 
+    @app.post(
+        "/api/v1/ask/stream",
+        responses=_VERSIONED_STREAM_RESPONSES,
+        response_model=None,
+    )
+    def ask_v1_stream(
+        payload: VersionedAskRequest,
+        credentials: HTTPAuthorizationCredentials | None = Depends(_PRODUCT_QA_BEARER),
+    ) -> EventSourceResponse | JSONResponse:
+        request_started_at = time.monotonic()
+        configured_key = get_runtime_settings().integration_api_key
+        if not configured_key:
+            return JSONResponse({"error": "service_not_configured"}, status_code=503)
+        if (
+            credentials is None
+            or credentials.scheme.casefold() != "bearer"
+            or not credentials.credentials
+        ):
+            return JSONResponse(
+                {"error": "unauthorized"},
+                status_code=401,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if not hmac.compare_digest(credentials.credentials, configured_key):
+            return JSONResponse(
+                {"error": "unauthorized"},
+                status_code=401,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if not rate_limiter.allow(credentials.credentials):
+            return JSONResponse(
+                {"error": "rate_limited"},
+                status_code=429,
+                headers={"Retry-After": "60"},
+            )
+
+        article = payload.article.strip()
+        question = payload.question.strip()
+        if not article or not question:
+            return JSONResponse({"error": "invalid_request"}, status_code=422)
+        try:
+            active = get_services()
+            with active["catalog"].connection_scope() as connection:
+                products = active["catalog"].search_products(
+                    article, connection=connection
+                )
+        except Exception as error:
+            _log_catalog_unavailable(error)
+            return JSONResponse({"error": "catalog_unavailable"}, status_code=503)
+        if not products:
+            return JSONResponse({"error": "product_not_found"}, status_code=404)
+        if len(products) != 1:
+            return JSONResponse({"error": "product_selection_required"}, status_code=409)
+        events = active["assistant"].stream(
+            products[0],
+            question,
+            history=payload.history,
+            request_started_at=request_started_at,
+        )
+        return _sse_response(events)
+
     return app
+
+
+def _sse_response(events) -> EventSourceResponse:
+    def frames():
+        yield _sse_frame("start", {"status": "started"})
+        try:
+            for event in events:
+                event_type = event.get("type")
+                if event_type == "delta":
+                    payload = {"text": event.get("text", "")}
+                elif event_type == "replace":
+                    payload = {"answer": event.get("answer", "")}
+                elif event_type == "error":
+                    payload = {"error": "answer_unavailable"}
+                elif event_type == "done":
+                    payload = {"status": "succeeded"}
+                else:
+                    continue
+                yield _sse_frame(event_type, payload)
+        except Exception:
+            yield _sse_frame("error", {"error": "answer_unavailable"})
+
+    return EventSourceResponse(
+        frames(),
+        headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"},
+    )
+
+
+def _sse_frame(event: str, payload: dict[str, str]) -> str:
+    return (
+        f"event: {event}\n"
+        f"data: {json.dumps(payload, ensure_ascii=False, separators=(',', ':'))}\n\n"
+    )
 
 
 def _product_payload(product: Product) -> dict[str, Any]:

@@ -59,6 +59,78 @@ paths:
           $ref: '#/components/responses/InvalidRequest'
         '429':
           $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /api/v1/ask/stream:
+    post:
+      operationId: askAboutProductStream
+      summary: Stream a Ukrainian answer about a product article
+      description: >-
+        Uses the same bearer authentication, optional history, request limits,
+        rate limit, exact catalog revalidation, and safety policy as
+        /api/v1/ask. Successful responses are Server-Sent Events (SSE). The
+        site backend must proxy them without buffering; browser code must not
+        receive the Product QA bearer credential. A start event does not mean
+        web search has begun.
+      security:
+        - productQaBearer: []
+      requestBody:
+        required: true
+        description: >-
+          Same JSON request body as /api/v1/ask. Body limit is 16,384 bytes;
+          remove oldest complete history messages if needed, never truncate
+          the current question.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AskRequest'
+            example:
+              article: RE0731
+              question: А після тренування?
+              history:
+                - role: user
+                  content: Попереднє запитання про цей товар.
+      responses:
+        '200':
+          description: >-
+            A sequence of SSE frames. Each frame has an event name and JSON
+            data. Events are start, delta, replace, done, or error.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              examples:
+                start:
+                  value: |-
+                    event: start
+                    data: {"status":"started"}
+
+                delta:
+                  value: |-
+                    event: delta
+                    data: {"text":"Відповідь "}
+
+                done:
+                  value: |-
+                    event: done
+                    data: {"status":"succeeded"}
+
+                error:
+                  value: |-
+                    event: error
+                    data: {"error":"answer_unavailable"}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '409':
+          $ref: '#/components/responses/ProductSelectionRequired'
+        '413':
+          $ref: '#/components/responses/RequestTooLarge'
+        '422':
+          $ref: '#/components/responses/InvalidRequest'
+        '429':
+          $ref: '#/components/responses/RateLimited'
         '502':
           $ref: '#/components/responses/AnswerUnavailable'
         '503':
