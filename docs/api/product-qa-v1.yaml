@@ -35,8 +35,8 @@ paths:
             schema:
               $ref: '#/components/schemas/AskRequest'
             example:
-              article: RE0731
-              question: Який об’єм шейкера?
+              article: <article/model/SKU>
+              question: <current product question>
       responses:
         '200':
           description: Answer generated successfully
@@ -46,7 +46,7 @@ paths:
                 $ref: '#/components/schemas/AskResponse'
               example:
                 status: succeeded
-                answer: Об’єм шейкера — 500 мл.
+                answer: <Ukrainian answer>
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -85,11 +85,11 @@ paths:
             schema:
               $ref: '#/components/schemas/AskRequest'
             example:
-              article: RE0731
-              question: А після тренування?
+              article: <article/model/SKU>
+              question: <current product question>
               history:
                 - role: user
-                  content: Попереднє запитання про цей товар.
+                  content: <previous user message>
       responses:
         '200':
           description: >-
@@ -108,7 +108,7 @@ paths:
                 delta:
                   value: |-
                     event: delta
-                    data: {"text":"Відповідь "}
+                    data: {"text":"<answer chunk>"}
 
                 done:
                   value: |-

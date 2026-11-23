@@ -27,11 +27,11 @@ Content-Type: application/json
 
 ```json
 {
-  "article": "RE0731",
-  "question": "Який об’єм шейкера?",
+  "article": "<article/model/SKU>",
+  "question": "<current product question>",
   "history": [
-    {"role": "user", "content": "Я шукаю шейкер для тренувань."},
-    {"role": "assistant", "content": "Можу відповісти на запитання про цей товар."}
+    {"role": "user", "content": "<previous user message>"},
+    {"role": "assistant", "content": "<previous assistant message>"}
   ]
 }
 ```
@@ -41,7 +41,7 @@ Content-Type: application/json
 ```json
 {
   "status": "succeeded",
-  "answer": "Об’єм шейкера — 500 мл."
+  "answer": "<Ukrainian answer>"
 }
 ```
 
@@ -157,4 +157,4 @@ URL Product QA — deployment setting, а backend сайта может прок
 
 Схема VPS, reverse proxy, bind mount для SQLite, TLS, grants, backup и timeout budget находится в [production blueprint](../deployment/product-qa-production-blueprint.md); практические шаги установки — в [VPS runbook](../deployment/product-qa-vps-runbook.md). Примеры содержат placeholder и не настраивают DNS или deploy автоматически.
 
-Runtime allowlist содержит утверждённые exact hostnames из [domain research](../superpowers/research/2026-11-19-raceexpert-web-search-domain-research.md), с ограничениями по брендам и типам источников. Производительские hostname разрешены только для сопоставленного бренда; `sponser.com.ua` и `sportpro.com.ua` — только SPONSER; `nutrend.com.ua` — только NUTREND и сохраняет статус условного, self-claimed поставщика. Для отзывов разрешены `fit.rozetka.com.ua` и `prom.ua`; Rozetka aliases относятся к одной `independence_group`. Makeup, Epicentr, SaltStick redirect и holdout бренды не включены. Реестр не использует wildcard и не означает полного покрытия каталога.
+Backend applies a server-side exact-host allowlist and validates evidence against the revalidated product and variant. Source URLs and provenance remain private and are not returned to the browser. The allowlist is maintained in `app/search_evidence.py`; it does not cover every catalog brand or SKU.

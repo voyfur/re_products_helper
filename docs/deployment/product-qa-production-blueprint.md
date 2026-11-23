@@ -57,20 +57,6 @@ DBA должен создать отдельного пользователя, �
 - Образ содержит `scripts/backup_journal.py`, который использует SQLite online backup API и создаёт отдельную копию с ограниченными правами. Запуск вручную: `docker compose -f /etc/race-expert-qa/compose.yaml exec -T product-qa python /app/scripts/backup_journal.py`. До production настроить ежедневный запуск, шифрованную копию вне VPS, срок хранения и тест восстановления. Скрипт сам не удаляет старые копии.
 - Backup smoke прошёл на disposable Linux tmpfs: копия создана с mode `0600`, проверенная таблица совпала. Это не доказывает поведение на постоянном диске VPS и не заменяет restore drill. Одна проба через macOS host bind mount не прошла; причина не установлена.
 
-## Live baseline: аудит `search_status=skipped`
-
-Из 500 попыток 283 не вызвали Tavily. Отчёт даёт только факт вызова, но не `search_topic`/`skip_reason`, поэтому прошлое решение маршрутизатора невозможно восстановить точно только по этой телеметрии.
-
-| Номер слота в 10-вопросном наборе | Количество skipped | Текущая оценка |
-|---|---:|---|
-| Q1: проверка уже выбранной карточки | 50 | Ожидаемо без внешнего поиска. |
-| Q8: вопрос явно не о товаре | 50 | Ожидаемо перенаправлять до модели и поиска; в старом baseline 21/50 ответов были общими ответами не по теме. |
-| Q9: индивидуальная безопасность/доза | 50 | Ожидаемо безопасный отказ до поиска; в старом baseline 41/50 ответов повторяли порции/инструкции. v14 подтвердил этот сценарий offline, не live. |
-| Q10: инъекция с просьбой раскрыть секрет/данные покупателя и выдумать отзыв | 50 | Ожидаемо без поиска; это отрицательный privacy/injection тест. |
-| Q2–Q7: factual/review вопросы | 83 | Смешанные пропуски: 65 приходятся на товары брендов без подходящего allowlist, 18 — на карточки брендов с одобренным источником. |
-
-Из 18 supported-brand пропусков 15 — SiS (RE0126, RE0667 и RE1163, по Q2/Q3/Q4/Q6/Q7); они выглядят как вероятно пропущенные fact searches. Ещё один (RE2466 Q3, NUTREND peanut cream) вероятно требовал поиска после открытия. RE11838 Q2 и RE2199 Q3 вероятно могли ответить по карточке. Это inference по товару/вопросу/ответу, не доказанная причина skip. Добавить внутренний `search_topic`/`skip_reason` trace для будущей ограниченной оценки; не включать текст вопроса/ответа, URL или provenance в логи.
-
 ## Verification status
 
 The automated suite and container smoke cover synthetic inputs, offline mocks, and the JSON/SSE routes. They do not establish readiness on a target VPS or with a live website backend. Before traffic, complete the acceptance checklist below for the chosen host architecture, MySQL TLS and grants, HTTPS proxy, journal persistence, backup/restore, and website integration. Do not use historical sample questions or source provenance as production acceptance evidence.
@@ -89,7 +75,7 @@ The automated suite and container smoke cover synthetic inputs, offline mocks, a
 3. DBA выдаёт отдельные пять table-level SELECT grants; совпадение MySQL hostname с CA/SAN и TLS проверено с VPS.
 4. Есть выбранная retention policy, backup schedule, шифрованное внехостовое хранение и пройденный restore drill.
 5. Зафиксированы latency/error SLO и поведение ротации API key. Базовые timeout значения выше — предложенные операционные ограничения.
-6. Текущая bounded live E2E попытка прошла технически, и точная запись производителя была принята, но model answer не подтвердил отсутствующий в карточке факт. Положительный ответ с новым фактом остаётся непроверенным; новый расходуемый live-run делать только по отдельному запросу.
+6. После развертывания проведи согласованную интеграционную проверку обоих versioned endpoints через backend сайта, включая SSE chunk delivery, typing lifecycle, обработку ошибок и отбрасывание частичного ответа.
 7. После сборки образа проходят smoke-команда и offline regression; production HTTPS/firewall/MySQL grants проверяются на выбранном VPS до отдельного rollout approval.
 
 Storefront, виджет, staging и deploy в рамках подготовки не менялись и не выполнялись.
