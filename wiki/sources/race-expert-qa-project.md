@@ -6,7 +6,7 @@ title: "Race Expert — вопросы и ответы о товаре"
 description: "Отдельное приложение Q&A по выбранному товару; prompt v18 активен, API поддерживает JSON и SSE POST, локальный UI показывает потоковый ответ с typing-индикатором."
 tags: ["project:race-expert", "domain:ecommerce", "capability:product-qa", "capability:web-search", "workflow:implementation", "topic:product-data"]
 source: {"raw_path": "raw/sources/qa-project-scope-and-transfer-2026-11-18.md"}
-dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-23T11:34:00+02:00"}
+dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-23T12:10:00+02:00"}
 relations: [{"type": "references", "target": "synthesis.race-expert-qa-evaluation"}, {"type": "references", "target": "source.race-expert-qa-mysql-access"}, {"type": "references", "target": "synthesis.race-expert-qa-web-search"}]
 aliases: ["Race Expert Q&A", "Помощник по вопросам о товаре"]
 status: "active"
@@ -54,6 +54,8 @@ QA-конфигурация и секреты хранятся локально 
 Подготовлены [спецификация Web Search](../../docs/superpowers/specs/2026-11-19-product-qa-web-search-design.md), [план](../../docs/superpowers/plans/2026-11-19-product-qa-web-search.md), [исследование доменов](../../docs/superpowers/research/2026-11-19-raceexpert-web-search-domain-research.md), [API-контракт](../../docs/api/product-qa-v1.yaml), [handoff разработчику](../../docs/api/product-qa-integration.md) и [brief интерфейса](../../docs/ui/product-qa-widget-brief.md). Реализованы [спортивная пригодность и скрытая временная история](../../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md), а также [POST streaming API и typing-индикатор](../../docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md). Утверждённый набор источников не покрывает все бренды. VPS в Украине — будущая цель; production-подключение требует runbook, TLS/firewall и read-only учётной записи.
 
 Offline-набор и mock container smoke v18 пройдены; 21.11 выполнен один bounded local UI E2E через каталог, Tavily exact-source filter и OpenAI. Streaming проверен отдельными offline-тестами, синтетическим browser preview и container smoke без сети. Эти результаты не подтверждают интеграцию storefront. Подробности и границы сохранены в [production-readiness synthesis](../syntheses/race-expert-qa-production-readiness.md). Секреты не записывались в Wiki; staging и production deploy не выполнялись. Общий staging остаётся отдельной средой на прежнем v12.
+
+Приватный handoff-репозиторий `voyfur/re_qa` содержит проверенный набор кода и документов для интеграции. Он не включает Wiki, raw-сессии/источники или eval-архивы. Публикация кода не означает подключение backend сайта или VPS deployment.
 
 ## Существующий общий staging
 

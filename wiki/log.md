@@ -193,3 +193,10 @@
 - Raw: `raw/sessions/2026-11-23-add-product-qa-streaming-and-typing.md`
 - Tags: `activity:implementation`, `status:completed`, `project:race-expert`, `task:product-qa-streaming`, `component:product-qa-api`, `component:local-qa-ui`, `topic:sse`, `file:app/main.py`, `file:app/assistant.py`, `file:app/openai_client.py`, `file:app/static/app.js`, `file:docs/api/product-qa-integration.md`, `file:docs/api/product-qa-v1.yaml`, `file:tests/test_streaming.py`, `file:wiki/session-handoff.md`
 - Status: `completed`
+
+
+## [2026-11-23] session | Publish Product QA streaming handoff
+
+- Raw: `raw/sessions/2026-11-23-publish-product-qa-streaming-handoff.md`
+- Tags: `activity:documentation`, `status:completed`, `project:race-expert`, `task:product-qa-handoff`, `component:product-qa-api`, `topic:github-handoff`, `file:docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md`, `file:wiki/sources/race-expert-qa-project.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/session-handoff.md`, `file:wiki/log.md`
+- Status: `completed`

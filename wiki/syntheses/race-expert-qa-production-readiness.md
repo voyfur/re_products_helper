@@ -6,7 +6,7 @@ title: "Подготовка Product QA Race Expert к production"
 description: "Проверенное состояние Product QA v18 с JSON/SSE API и локальным typing UI; открытые требования подключения backend сайта и VPS acceptance."
 tags: ["project:race-expert", "capability:product-qa", "workflow:deployment", "topic:production-readiness", "platform:raceexpert.com.ua"]
 source: {"raw_path": "docs/test-harness/qa-live-50-products-500-questions-2026-11-20.md"}
-dates: {"added_at": "2026-11-21T17:24:20+02:00", "updated_at": "2026-11-23T11:34:00+02:00"}
+dates: {"added_at": "2026-11-21T17:24:20+02:00", "updated_at": "2026-11-23T12:10:00+02:00"}
 relations: [{"type": "references", "target": "synthesis.race-expert-qa-evaluation"}, {"type": "references", "target": "synthesis.race-expert-qa-web-search"}, {"type": "references", "target": "project.race-expert-qa"}]
 aliases: ["Product QA production readiness", "Продакшн-готовность Q&A"]
 status: "active"
@@ -83,4 +83,4 @@ Backend прошёл локальный 500-сценарный E2E после в
 
 ## Следующий рабочий этап
 
-Кодовая часть готова, но backend сайта и storefront не подключены. Для отдельного handoff использовать [API integration guide](../../docs/api/product-qa-integration.md) и [VPS install runbook](../../docs/deployment/product-qa-vps-runbook.md): backend сайта должен server-side проксировать JSON или SSE POST по HTTPS, а stream route — без buffering; integration key остаётся только в backend сайта. До рабочего трафика нужны image для целевой архитектуры, MySQL TLS/hostname verification и read-only grants, reverse-proxy routes, постоянный защищённый SQLite volume, backup/restore и операционная acceptance. Checkout этой реализации находится по пути `/Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18`; это локальный snapshot без remote/upstream.
+Кодовая часть готова и опубликована в приватном репозитории `voyfur/re_qa`; backend сайта и storefront ещё не подключены. Handoff включает 54 проверенных файла backend, prompt history, tests, deployment и integration docs; Wiki, raw-сессии/источники и eval-архивы в репозиторий не включались. Для подключения использовать [API integration guide](../../docs/api/product-qa-integration.md) и [VPS install runbook](../../docs/deployment/product-qa-vps-runbook.md): backend сайта должен server-side проксировать JSON или SSE POST по HTTPS, а stream route — без buffering; integration key остаётся только в backend сайта. До рабочего трафика нужны image для целевой архитектуры, MySQL TLS/hostname verification и read-only grants, reverse-proxy routes, постоянный защищённый SQLite volume, backup/restore и операционная acceptance. VPS/staging/production deployment не выполнялся.

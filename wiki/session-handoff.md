@@ -2,20 +2,19 @@
 
 ## Active Context
 
-- Last session: `raw/sessions/2026-11-23-add-product-qa-streaming-and-typing.md`
-- Current objective: Add Product QA streaming and typing
+- Last session: `raw/sessions/2026-11-23-publish-product-qa-streaming-handoff.md`
+- Current objective: Publish Product QA streaming handoff
+- Preserved local checkout: `/Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18` (branch `codex/product-qa-v18`)
 
 ## Current Decisions
 
-- Keep POST /api/v1/ask as JSON and add POST /api/v1/ask/stream for SSE.
-- Typing and streamed answer are available in the local QA UI; conversation history stays hidden and volatile.
-- The site backend must proxy the stream server-side with buffering disabled and keep credentials server-side.
+- Keep website credentials server-side and proxy JSON or SSE POST from the site backend.
+- Do not deploy to VPS, staging, or production as part of this handoff.
 
 ## Open Tasks
 
-- Connect the website backend to the versioned JSON or SSE endpoint; no storefront code is connected by this implementation.
-- Complete target VPS configuration and acceptance separately; no deployment was performed.
-- Provide the target Product QA repository if this local branch should be published.
+- Website programmer must connect the site backend to the versioned JSON/SSE API.
+- Operator must configure the target VPS, database TLS/read-only access, reverse proxy, persistence, and acceptance checks.
 
 ## Blockers
 
@@ -23,16 +22,14 @@
 
 ## Next Action
 
-- Use docs/api/product-qa-integration.md for the site-backend handoff and docs/deployment/product-qa-vps-runbook.md for VPS acceptance.
-- Keep this branch local until a Product QA repository target is supplied.
+- Use docs/api/product-qa-integration.md for website backend integration.
+- Use docs/deployment/product-qa-vps-runbook.md for operator VPS installation and acceptance.
 
 ## Relevant Pages
 
 - wiki/index.md
 - wiki/sources/race-expert-qa-project.md
-- wiki/syntheses/race-expert-qa-evaluation.md
-- wiki/syntheses/race-expert-qa-web-search.md
 - wiki/syntheses/race-expert-qa-production-readiness.md
 - docs/api/product-qa-integration.md
-- docs/api/product-qa-v1.yaml
 - docs/deployment/product-qa-vps-runbook.md
+- docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md

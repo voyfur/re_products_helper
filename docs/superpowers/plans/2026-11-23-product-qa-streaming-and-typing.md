@@ -98,11 +98,11 @@
 - Modify: `docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md`
 
 - [x] Commit the verified feature on the dedicated Product QA branch.
-- [ ] Publish it only to a Product QA repository, never to the unrelated `raceexpert-summary-service` repository.
-- [x] If no matching repository is available, keep the branch local and request the target repository or a new private repository name before publishing.
+- [x] Publish the verified handoff only to the Product QA repository `voyfur/re_qa`; do not publish to the unrelated `raceexpert-summary-service` repository.
+- [x] Keep the branch local while no target was available; after the user provided `voyfur/re_qa`, publish the curated handoff snapshot there.
 - [x] Leave VPS/staging/production deployment to the site programmer and report the complete endpoint handoff.
 
 ### Execution notes
 
 - The Task 2 and Task 3 implementation groups were verified by their final focused tests, but the pre-implementation red runs were not performed. The corresponding red-run checklist items remain unchecked.
-- No matching Product QA remote is configured in this checkout, so publishing is pending the user-provided target repository. No storefront, VPS, staging, or production code was changed or deployed.
+- The verified handoff snapshot was published to private repository `voyfur/re_qa` on `main`. The snapshot includes the backend, active/history prompts, tests, deployment files, and programmer-facing docs; it excludes Wiki, raw session/source records, and eval archives. No storefront, VPS, staging, or production code was changed or deployed.
