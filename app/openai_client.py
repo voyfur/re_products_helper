@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 import urllib.error
 import urllib.request
 from collections.abc import Sequence
@@ -83,10 +84,14 @@ class OpenAIResponsesClient:
         *,
         opener: Callable[..., Any] = urllib.request.urlopen,
         timeout: int = 60,
+        retries: int = 1,
+        retry_delay: float = 0.05,
     ):
         self.api_key = api_key
         self.opener = opener
         self.timeout = timeout
+        self.retries = retries
+        self.retry_delay = retry_delay
 
     def decide(
         self,
@@ -452,13 +457,24 @@ class OpenAIResponsesClient:
             text_format=text_format,
             stream=False,
         )
-        try:
-            with self.opener(request, timeout=self.timeout) as response:
-                body = json.loads(response.read())
-        except urllib.error.HTTPError:
-            raise ProviderError("provider_error") from None
-        except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError):
-            raise ProviderError("provider_unavailable") from None
+        body = None
+        for attempt in range(self.retries + 1):
+            try:
+                with self.opener(request, timeout=self.timeout) as response:
+                    body = json.loads(response.read())
+                break
+            except urllib.error.HTTPError as error:
+                if attempt < self.retries and error.code in {429, 500, 502, 503, 504}:
+                    if self.retry_delay > 0:
+                        time.sleep(self.retry_delay)
+                    continue
+                raise ProviderError("provider_error") from None
+            except (urllib.error.URLError, TimeoutError, OSError, json.JSONDecodeError):
+                if attempt < self.retries:
+                    if self.retry_delay > 0:
+                        time.sleep(self.retry_delay)
+                    continue
+                raise ProviderError("provider_unavailable") from None
         if not isinstance(body, dict):
             raise ProviderError("provider_invalid_response")
         return body

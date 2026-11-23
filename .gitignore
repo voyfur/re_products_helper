@@ -5,3 +5,6 @@ __pycache__/
 *.py[cod]
 var/
 secrets/
+state/
+*.sqlite3
+*.sqlite

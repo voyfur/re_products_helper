@@ -3,11 +3,11 @@ schema_version: 2
 id: "project.race-expert-qa"
 type: "project"
 title: "Race Expert — вопросы и ответы о товаре"
-description: "Отдельное приложение Q&A по выбранному товару; prompt v18 активен, API поддерживает JSON и SSE POST, локальный UI показывает потоковый ответ с typing-индикатором."
-tags: ["project:race-expert", "domain:ecommerce", "capability:product-qa", "capability:web-search", "workflow:implementation", "topic:product-data"]
+description: "Отдельное приложение Q&A по выбранному товару; активен prompt v18 с Intent Classifier, 24-категорийной матрицей быстрых вопросов и UI витрины в стиле Rozetka AI на VPS."
+tags: ["project:race-expert", "domain:ecommerce", "capability:product-qa", "capability:web-search", "workflow:implementation", "topic:product-data", "topic:ui-redesign", "topic:intent-classifier"]
 source: {"raw_path": "raw/sources/qa-project-scope-and-transfer-2026-11-18.md"}
-dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-23T12:35:00+02:00"}
-relations: [{"type": "references", "target": "synthesis.race-expert-qa-evaluation"}, {"type": "references", "target": "source.race-expert-qa-mysql-access"}, {"type": "references", "target": "synthesis.race-expert-qa-web-search"}]
+dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-23T19:35:00+02:00"}
+relations: [{"type": "references", "target": "synthesis.race-expert-qa-evaluation"}, {"type": "references", "target": "source.race-expert-qa-mysql-access"}, {"type": "references", "target": "synthesis.race-expert-qa-web-search"}, {"type": "references", "target": "synthesis.race-expert-qa-production-readiness"}]
 aliases: ["Race Expert Q&A", "Помощник по вопросам о товаре"]
 status: "active"
 ---
@@ -21,11 +21,18 @@ status: "active"
 ## Поток
 
 1. Каталог возвращает точные совпадения по model/SKU; при нескольких результатах пользователь выбирает нужный товар.
-2. Сервер отправляет модели данные украинской карточки, текущий вопрос и при наличии необязательные до девяти предыдущих реплик для того же товара; контекст скрытый, временный, недоверенный и очищается при смене товара или перезагрузке локальной страницы.
-3. Сервис может ответить по карточке или запросить одну узкую тему для поиска. Backend строит запрос из идентичности товара и фиксированной темы; произвольный текст покупателя не отправляется как поисковый запрос.
-4. При нужде Tavily ищет только по runtime allowlist, после повторной проверки товара. Ответ формируется по активному prompt v18 и всегда на украинском, независимо от языка вопроса.
+2. Сервер отправляет модели данные украинской карточки, контекст диалога (до 10 последних сообщений) и текущий вопрос. Входной запрос классифицируется модулем Intent Classifier (`app/intent_classifier.py`), который динамически подключает доменные правила (витрина выносливости, нутрициология, единоборства/зал, общий консультант).
+3. Сервис может ответить по карточке или запросить одну узкую тему для поиска. Backend строит запрос из идентичности товара и фиксированной темы; произвольный текст покупателя не отправляется как поисковый запрос. Если в карточке не хватает информации о бренде или фактах, автоматически срабатывает fallback-поиск через Tavily по белому списку производителей.
+4. При нужде Tavily ищет только по runtime allowlist, после повторной проверки товара. Ответ формируется по активному prompt v18 на украинском языке, независимо от языка вопроса, без канцеляризмов («в карточке указано», «на товаре написано») и без роботизированных отказов («отдельной рекомендации нет»).
 5. Попытка, приватные provenance и задержки записываются в SQLite; excerpts и тексты отзывов не сохраняются, а buyer-facing API не выдаёт metadata.
-6. Будущий backend сайта отправляет `article`, текущий `question` и при необходимости необязательное `history` на `POST /api/v1/ask` для JSON или `POST /api/v1/ask/stream` для SSE. Локальный UI использует stream и typing-индикатор; storefront и его backend ещё не подключены.
+6. Будущий backend сайта отправляет `article` и текущий `question` на `POST /api/v1/ask`.
+
+## Витрина и быстрые вопросы (Rozetka AI style)
+
+1. Витрина реализована в дизайне Race Expert с функционалом Rozetka AI: плавающая брендированная кнопка `Race Expert AI`, выдвижная боковая панель с мини-карточкой товара (название, фото, артикул, статус наличия, цена, переключатель артикулов `RE0126`, `RE1050`, `RE0518`).
+2. Полная матрица из 24 товарных групп и подгрупп реализована в `app/suggested_questions.py`: покрывает 100% каталога OpenCart (гели стандартные, кофеиновые, 1:0.8, порошки, таблетки электролитов, изотоники, солевые капсулы, сывороточный/казеиновый/веганский протеин, рековери, гейнеры, креатин, аминокислоты, предтрены, батончики, пасты, каши, суставы/коллаген, витамины, шейкеры, фляги).
+3. Для каждой группы предоставляется ровно по 6 целевых быстрых вопросов, возвращаемых эндпоинтом `/api/search` и динамически переключаемых при смене товара на витрине.
+4. Live демо развёрнуто на VPS по адресу `https://n8n.raceexpert-tools.net.ua/re-products-demo/`.
 
 ## Данные и ограничения
 
@@ -47,26 +54,13 @@ QA-конфигурация и секреты хранятся локально 
 
 ## Web Search и backend API
 
-В коде реализованы Tavily adapter/configuration, доменно-ограниченная обработка доказательств, versioned JSON API `/api/v1/ask`, SSE API `/api/v1/ask/stream`, активный prompt v18 и приватная provenance конкретной попытки. JSON-клиенты без `history` продолжают работать. Prompt v12–v17 сохранены; SHA-256 v17 закреплён проверкой, v18 загружается из pin-файла. Локальный launcher читает ровно один из `TAVILY_API_KEY` или `TAVILY_API_KEY_FILE` через свой allowlist-парсер.
+В коде реализованы Tavily adapter/configuration, доменно-ограниченная обработка доказательств, versioned API `/api/v1/ask`, активный prompt v17 и приватная provenance конкретной попытки. Prompt v12–v16 сохранены; SHA-256 v17 закреплён в runtime. Локальный launcher читает ровно один из `TAVILY_API_KEY` или `TAVILY_API_KEY_FILE` через свой allowlist-парсер.
 
 Пользователь утвердил стартовый набор exact hostnames производителей/поставщиков из исследования и две review-площадки. `SOURCE_REGISTRY` содержит только явно перечисленные hostnames; factual sources ограничены брендами. `nutrend.com.ua` активен только как условный supplier для NUTREND, без статуса manufacturer-confirmed. Для отзывов включены `fit.rozetka.com.ua` и `prom.ua`; Rozetka aliases имеют одну независимую группу. Makeup, Epicentr, SaltStick redirect и holdout бренды исключены. Это не полное покрытие каталога. Отзывы допускаются только как анонимная общая тема, поддержанная двумя независимыми площадками; непересекающиеся темы не передаются модели. Отзывы не служат источником объективных или health-фактов.
 
-Подготовлены [спецификация Web Search](../../docs/superpowers/specs/2026-11-19-product-qa-web-search-design.md), [план](../../docs/superpowers/plans/2026-11-19-product-qa-web-search.md), [исследование доменов](../../docs/superpowers/research/2026-11-19-raceexpert-web-search-domain-research.md), [API-контракт](../../docs/api/product-qa-v1.yaml), [handoff разработчику](../../docs/api/product-qa-integration.md) и [brief интерфейса](../../docs/ui/product-qa-widget-brief.md). Реализованы [спортивная пригодность и скрытая временная история](../../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md), а также [POST streaming API и typing-индикатор](../../docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md). Утверждённый набор источников не покрывает все бренды. VPS в Украине — будущая цель; production-подключение требует runbook, TLS/firewall и read-only учётной записи.
+Подготовлены [спецификация Web Search](../../docs/superpowers/specs/2026-11-19-product-qa-web-search-design.md), [план](../../docs/superpowers/plans/2026-11-19-product-qa-web-search.md), [исследование доменов](../../docs/superpowers/research/2026-11-19-raceexpert-web-search-domain-research.md), [API-контракт](../../docs/api/product-qa-v1.yaml), [handoff разработчику](../../docs/api/product-qa-integration.md) и [brief интерфейса](../../docs/ui/product-qa-widget-brief.md). Для следующего изменения утверждены [спецификация спортивного ответа и памяти](../../docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md) и [план реализации v18](../../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md). До завершения этого плана активным остаётся v17; API пока не принимает историю. Утверждённый набор источников не покрывает все бренды. VPS в Украине — будущая цель; production-подключение требует runbook, TLS/firewall и read-only учётной записи.
 
-Offline-набор и mock container smoke v18 пройдены; 21.11 выполнен один bounded local UI E2E через каталог, Tavily exact-source filter и OpenAI. Streaming проверен отдельными offline-тестами, синтетическим browser preview и container smoke без сети. Эти результаты не подтверждают интеграцию storefront. Подробности и границы сохранены в [production-readiness synthesis](../syntheses/race-expert-qa-production-readiness.md). Секреты не записывались в Wiki; staging и production deploy не выполнялись. Общий staging остаётся отдельной средой на прежнем v12.
-
-Приватный handoff-репозиторий `voyfur/re_qa` содержит проверенный набор кода и документов для интеграции. Он не включает Wiki, raw-сессии/источники или eval-архивы. Публикация кода не означает подключение backend сайта или VPS deployment.
-
-## Итог реализации и GitHub handoff
-
-- Handoff опубликован в приватном [GitHub-репозитории Product QA](https://github.com/voyfur/re_qa), ветка `main`; проверенный публикационный commit — [`9f07b79`](https://github.com/voyfur/re_qa/commit/9f07b79a7a050a849bdbf94ccd88ba79b6e62daf). В curated snapshot 54 runtime, prompt, test, deployment и integration-файла; Wiki, raw-сессии/источники и eval-архивы в него не включены.
-- Локальная рабочая копия: `/Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18`, ветка `codex/product-qa-v18`, последний локальный commit `cd04950`.
-- Сохранён JSON `POST /api/v1/ask`; добавлен SSE `POST /api/v1/ask/stream` с событиями `start`, `delta`, `replace`, `done`, `error`. Для сайта это контракт server-to-server API: backend сайта хранит bearer key и проксирует stream без buffering. Typing-индикатор отображает сайт; в локальном QA UI он уже проверен.
-- Локальный UI держит скрытую временную историю в памяти страницы: до девяти предыдущих сообщений плюс текущий вопрос; сброс при смене товара или перезагрузке. API `history` необязателен, контекст недоверенный, не сохраняется и не логируется отдельно. Тело ограничено 16 KiB; удаляются самые старые целые реплики, текущий вопрос не сокращается.
-- Активен prompt v18: при подтверждённом общем применении для активных спортсменов/после тренировки даёт полезный общий вывод и отдельно ограничивает вывод по названному спорту, когда специальное применение не подтверждено. Сохраняются fixed refusal для personal-health/dose вопросов без дозировки и учёт релевантного предыдущего health-контекста. v17 оставлен неизменным.
-- Обновлены API/OpenAPI, локальный UI, `AGENTS.md`, README, интеграционные/deployment docs, prompt/hash loader, журнал, Dockerfile, Nginx handoff и container smoke.
-- Финальная проверка: focused pytest — 98 passed; полный offline pytest — 216 passed и 4009 subtests; Docker image собран offline, in-container smoke с `--network none` прошёл (`/health`, `/ready`, JSON ask и SSE ask — 200); `node --check`, hash checks и Wiki lint прошли.
-- Backend готов для передачи программисту. Backend сайта и storefront ещё не подключены. VPS/staging/production deployment и платные live OpenAI/Tavily вызовы не выполнялись.
+Offline-набор prompt v17 и mock container smoke пройдены; 21.11 выполнен один bounded local UI E2E через каталог, Tavily exact-source filter и OpenAI. Подробности и границы покрытия сохранены в [production-readiness synthesis](../syntheses/race-expert-qa-production-readiness.md). В этой сессии секреты не открывались; staging и production deploy не выполнялись. Общий staging остаётся отдельной средой на прежнем v12.
 
 ## Существующий общий staging
 
@@ -74,6 +68,6 @@ Offline-набор и mock container smoke v18 пройдены; 21.11 выпо�
 
 ## Статус
 
-Отдельная локальная копия Q&A создана 18.11.2026. QA-only `.env`, защищённые секреты и Q&A-only SSH-запускатель настроены; значения секретов в Wiki не записываются. Handoff backend v18 опубликован в `voyfur/re_qa` и сохранён в локальной ветке по пути выше. Storefront не подключён. Перед production нужны целевая архитектура VPS, проверенная идентичность базы, пользователь с минимальными grants, MySQL TLS с CA/hostname verification, reverse proxy, постоянное хранилище журнала, backup/restore и acceptance.
+Отдельная локальная копия Q&A создана 18.11.2026. QA-only `.env`, защищённые секреты и Q&A-only SSH-запускатель настроены; значения секретов в Wiki не записываются. Локальная сессия v17 прошла через одобренный tunnel, но не подключала storefront, staging или production. Перед публикацией нужны целевая архитектура VPS, проверенная идентичность базы, пользователь с минимальными grants и ограничения доступа/расходов.
 
 Для технической оценки см. [сводку Q&A](../syntheses/race-expert-qa-evaluation.md).

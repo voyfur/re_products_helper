@@ -36,7 +36,7 @@ class SourceCandidate:
 # hosts are allowed; factual sources are restricted to their mapped brands.
 _MANUFACTURER_HOSTS: tuple[tuple[tuple[str, ...], frozenset[str]], ...] = (
     (("maurten.com", "www.maurten.com"), frozenset({"Maurten"})),
-    (("scienceinsport.com", "www.scienceinsport.com"), frozenset({"Science in Sport", "SiS"})),
+    (("scienceinsport.com", "www.scienceinsport.com"), frozenset({"Science in Sport", "SiS", "Science in Sport (SiS)", "Science In Sport (SIS)", "SIS"})),
     (("guenergy.com",), frozenset({"GU Energy", "GU"})),
     (("precisionhydration.com", "www.precisionhydration.com"), frozenset({"Precision Hydration", "Precision Fuel & Hydration", "PFH"})),
     (("226ers.com", "www.226ers.com"), frozenset({"226ERS"})),
@@ -614,6 +614,42 @@ def _product_match_basis(
         for source_text in source_texts
     ):
         return "product_name"
+    if brand_verified_by_host:
+        latin_name_tokens = {
+            token
+            for token in _identity_match_tokens(card.name)
+            if re.fullmatch(r"[a-z0-9]+", token)
+            and not token.isdecimal()
+            and token not in {"ml", "mg", "mcg", "kg", "g", "oz", "lb", "l"}
+        }
+        if brand:
+            latin_name_tokens.difference_update(set(_identity_match_tokens(brand)))
+        card_numbers = {
+            token for token in _identity_match_tokens(card.name) if token.isdecimal()
+        }
+        if len(latin_name_tokens) >= 2:
+            for source_text in source_texts:
+                source_tokens = set(_identity_match_tokens(source_text))
+                if not (latin_name_tokens <= source_tokens):
+                    continue
+                source_numbers = {
+                    token for token in source_tokens if token.isdecimal()
+                }
+                if card_numbers and source_numbers and not (card_numbers & source_numbers):
+                    continue
+                return "product_name"
+
+        if product.model:
+            model_tokens = {
+                token
+                for token in _identity_match_tokens(product.model)
+                if not token.isdecimal() and token not in {"ml", "mg", "mcg", "kg", "g", "oz", "lb", "l"}
+            }
+            if len(model_tokens) >= 2 and any(
+                model_tokens <= set(_identity_match_tokens(source_text))
+                for source_text in source_texts
+            ):
+                return "model_code"
     return None
 
 
@@ -670,6 +706,9 @@ def _card_brand(product: Product) -> str:
     return brand or _brand_in_product_name(card.name)
 
 
+_SHORT_BRAND_ACRONYMS = frozenset({"sis", "gu", "pfh"})
+
+
 def _brand_in_product_name(name: str | None) -> str:
     if not isinstance(name, str) or not name.strip():
         return ""
@@ -677,7 +716,11 @@ def _brand_in_product_name(name: str | None) -> str:
     for rule in SOURCE_REGISTRY.values():
         for brand in sorted(rule.product_brands):
             tokens = _identity_match_tokens(brand)
-            if not tokens or (len(tokens) == 1 and len(tokens[0]) < 4):
+            if not tokens or (
+                len(tokens) == 1
+                and len(tokens[0]) < 4
+                and tokens[0] not in _SHORT_BRAND_ACRONYMS
+            ):
                 continue
             if _contains_phrase(name, brand):
                 normalized = _normalize(brand)
@@ -733,7 +776,16 @@ def _contains_phrase(text: str, phrase: str) -> bool:
 
 
 def _same_identity(left: str, right: str) -> bool:
-    return _normalize(left) == _normalize(right)
+    if _normalize(left) == _normalize(right):
+        return True
+    left_clean = re.sub(r"\s*\([^)]*\)", "", left).strip()
+    right_clean = re.sub(r"\s*\([^)]*\)", "", right).strip()
+    if left_clean and right_clean and _normalize(left_clean) == _normalize(right_clean):
+        return True
+    for paren in re.findall(r"\(([^)]+)\)", left) + re.findall(r"\(([^)]+)\)", right):
+        if _normalize(paren) == _normalize(left) or _normalize(paren) == _normalize(right):
+            return True
+    return False
 
 
 def _independence_key(hostname: str, rule: SourceRule) -> str:

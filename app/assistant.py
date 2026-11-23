@@ -11,6 +11,7 @@ from collections.abc import Sequence
 from typing import Callable
 
 from app.conversation import ConversationMessage
+from app.intent_classifier import classify_intent, enrich_prompt_with_intent
 from app.journal import Journal, JournalAttempt
 from app.openai_client import (
     AssistantDecision,
@@ -108,6 +109,32 @@ _PERSONAL_SAFETY_FOLLOWUP_RE = re.compile(
     r"(?:можна|можу)\s+мені|"
     r"can\s+i|may\s+i|should\s+i"
     r")\b"
+)
+_NEUTRAL_LABEL_CONTEXT_RE = re.compile(
+    r"(?ix)\b(?:"
+    r"за\s+інструкцією|по\s+инструкции|на\s+етикетці|на\s+этикетке|"
+    r"на\s+упаковці|на\s+упаковке|вказано\s+виробником|указано\s+производителем|"
+    r"рекомендаці[яї]\s+виробника|рекомендаци[яи]\s+производителя|"
+    r"за\s+маркуванням|по\s+маркировке|"
+    r"on\s+the\s+label|per\s+instructions?|manufacturer\s+instructions?|"
+    r"stated\s+by\s+manufacturer"
+    r")\b"
+)
+_PERSONAL_PRONOUNS_RE = re.compile(
+    r"(?ix)\b(?:"
+    r"мені|мне|для\s+мене|для\s+меня|моя|моє|мій|мой|мое|"
+    r"чи\s+можу\s+я|могу\s+ли\s+я|чи\s+варто\s+мені|стоит\s+ли\s+мне|"
+    r"я\s+можу|я\s+могу|for\s+me|should\s+i|can\s+i|my\s+dose"
+    r")\b"
+)
+_BRAND_INQUIRY_RE = re.compile(
+    r"(?ix)"
+    r"\b(?:бренд\w*|виробник\w*|производител\w*|марк[аиеуы]|марку|компані[яїію]|компани[яию])\b|"
+    r"\b(?:чий|чей|чия|чья|чье|чиє)\b.{0,30}\b(?:продукт\w*|товар\w*|напій|напиток)\b"
+)
+_MISSING_INFO_IN_ANSWER_RE = re.compile(
+    r"(?i)\b(?:немає|відсутн\w+|не\s+(?:вказано|зазначено|наведено|знайдено)|бракує|не\s+містить)\b.{0,40}\b(?:інформаці\w*|даних|відомостей|деталей|подробиць)\b|"
+    r"\bдодаткової\s+підтвердженої\s+інформації\s+немає\b"
 )
 URL_OR_DOMAIN_RE = re.compile(
     r"(?:https?://|www\.)\S+|\b(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/\S*)?",
@@ -214,8 +241,13 @@ class AssistantService:
                 )
                 return self.journal.get_attempt(attempt.attempt_id)
 
+            intent = classify_intent(question)
+            effective_instructions = enrich_prompt_with_intent(
+                self.system_prompt, intent
+            )
+
             decision = self.provider.decide(
-                instructions=self.system_prompt,
+                instructions=effective_instructions,
                 product_context=product_context,
                 question=question,
                 history=history,
@@ -285,7 +317,7 @@ class AssistantService:
                                 0, round((time.monotonic() - search_started) * 1000)
                             )
                 final = self.provider.answer_with_evidence(
-                    instructions=self.system_prompt,
+                    instructions=effective_instructions,
                     product_context=product_context,
                     question=question,
                     evidence=evidence_text,
@@ -383,8 +415,13 @@ class AssistantService:
                 yield {"type": "done"}
                 return
 
+            intent = classify_intent(question)
+            effective_instructions = enrich_prompt_with_intent(
+                self.system_prompt, intent
+            )
+
             decision_stream = self.provider.decide_stream(
-                instructions=self.system_prompt,
+                instructions=effective_instructions,
                 product_context=product_context,
                 question=question,
                 history=history,
@@ -455,7 +492,7 @@ class AssistantService:
                                 0, round((time.monotonic() - search_started) * 1000)
                             )
                 final_stream = self.provider.answer_with_evidence_stream(
-                    instructions=self.system_prompt,
+                    instructions=effective_instructions,
                     product_context=product_context,
                     question=question,
                     evidence=evidence_text,
@@ -613,9 +650,11 @@ def _is_personal_health_request(
     question: str,
     history: Sequence[ConversationMessage] = (),
 ) -> bool:
-    if _PERSONAL_HEALTH_CONTEXT_RE.search(question) or _PERSONALIZED_DOSE_RE.search(
-        question
-    ):
+    if _PERSONAL_HEALTH_CONTEXT_RE.search(question):
+        return True
+    if _PERSONALIZED_DOSE_RE.search(question):
+        if _NEUTRAL_LABEL_CONTEXT_RE.search(question) and not _PERSONAL_PRONOUNS_RE.search(question):
+            return False
         return True
 
     prior_user_context = " ".join(

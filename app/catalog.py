@@ -86,6 +86,43 @@ def create_mysql_connection(
     )
 
 
+def create_mysql_connection_factory(
+    settings: CatalogSettings,
+    *,
+    pool_size: int = 5,
+    connector: Callable[..., Any] | None = None,
+) -> Callable[[], Any]:
+    if not settings.host or not settings.database or not settings.user or not settings.password:
+        raise ValueError("mysql_configuration_incomplete")
+    if not settings.ssl_ca.is_file():
+        raise ValueError("mysql_ca_unavailable")
+
+    if connector is not None or pool_size <= 1:
+        return lambda: create_mysql_connection(settings, connector=connector)
+
+    try:
+        from mysql.connector.pooling import MySQLConnectionPool
+
+        pool = MySQLConnectionPool(
+            pool_name="product_qa_catalog",
+            pool_size=pool_size,
+            pool_reset_session=True,
+            host=settings.host,
+            port=settings.port,
+            database=settings.database,
+            user=settings.user,
+            password=settings.password,
+            ssl_ca=str(settings.ssl_ca),
+            ssl_verify_cert=True,
+            ssl_verify_identity=True,
+            allow_local_infile=False,
+            connection_timeout=5,
+        )
+        return pool.get_connection
+    except Exception:
+        return lambda: create_mysql_connection(settings, connector=connector)
+
+
 class OpenCartCatalog:
     def __init__(self, connection_factory: Callable[[], Any]):
         self.connection_factory = connection_factory

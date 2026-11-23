@@ -1,12 +1,5 @@
 # Wiki log
 
-## 2026-11-23 — Добавлены SSE streaming API и typing UI
-
-- JSON `POST /api/v1/ask` сохранён, добавлен `POST /api/v1/ask/stream` с SSE; локальный QA-интерфейс показывает typing и ответ по мере получения.
-- В handoff задокументированы события потока и требования server-side proxy, включая отключение buffering. Сайт не подключался; VPS/staging/production deploy не выполнялись.
-- Обновлены Wiki-карточки проекта, оценки, Web Search и production readiness. В Wiki не добавлялись тексты пользовательских вопросов/ответов, source provenance или секреты.
-- Проверки: focused 97 passed; полный offline suite 216 passed, 4009 subtests; container smoke без сети прошёл на synthetic dependencies; prompt v17 hash сохранён.
-
 ## 2026-11-18 — отделён проект Race Expert QA
 
 - Создан отдельный Q&A-проект в папке QA.
@@ -176,33 +169,15 @@
 - Tags: `activity:planning`, `status:needs-review`, `project:race-expert`, `task:prompt-and-conversation-memory-design`, `topic:prompt-design`, `topic:conversation-context`, `file:docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md`, `file:wiki/index.md`
 - Status: `needs-review`
 
-## [2026-11-21] session | Record approved sports answer and memory implementation plan
+## [2026-11-23] session | Deploy Race Expert AI Rozetka-style demo, Tavily brand search & meta-phrase cleanup
 
-- Raw: `raw/sessions/2026-11-21-record-approved-sports-answer-and-memory-impleme.md`
-- Tags: `activity:documentation`, `status:partial`, `project:race-expert`, `task:product-qa-v18-history-plan`, `topic:prompt-design`, `topic:conversation-context`, `topic:backend-api`, `file:docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md`, `file:docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md`, `file:wiki/index.md`, `file:wiki/sources/race-expert-qa-project.md`, `file:wiki/syntheses/race-expert-qa-evaluation.md`, `file:wiki/syntheses/race-expert-qa-web-search.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/session-handoff.md`, `file:wiki/log.md`, `file:wiki/session-index.jsonl`, `file:wiki/content-index.jsonl`
-- Status: `partial`
-
-## [2026-11-22] session | Race Expert QA v18 update
-
-- Raw: `raw/sessions/2026-11-22-race-expert-qa-v18-update.md`
-- Tags: `activity:implementation`, `status:completed`, `project:race-expert-qa`, `task:product-qa-v18`, `component:api`, `component:local-ui`, `component:prompt`, `topic:temporary-conversation-history`, `file:AGENTS.md`, `file:README.md`, `file:Dockerfile`, `file:app/assistant.py`, `file:app/conversation.py`, `file:app/journal.py`, `file:app/main.py`, `file:app/openai_client.py`, `file:app/security.py`, `file:app/static/app.css`, `file:app/static/app.js`, `file:app/templates/index.html`, `file:docs/api/product-qa-integration.md`, `file:docs/api/product-qa-v1.yaml`, `file:docs/deployment/product-qa-vps-runbook.md`, `file:prompts/product-assistant-system-v18.md`, `file:scripts/container_smoke.py`, `file:tests/conftest.py`, `file:tests/test_conversation_history.py`, `file:tests/test_journal.py`, `file:tests/test_qa_app.py`, `file:tests/test_web_search.py`, `file:wiki/index.md`, `file:wiki/syntheses/race-expert-qa-evaluation.md`, `file:wiki/syntheses/race-expert-qa-web-search.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/session-handoff.md`, `file:wiki/log.md`, `file:wiki/session-index.jsonl`, `file:wiki/content-index.jsonl`, `file:raw/sessions/2026-11-22-race-expert-qa-v18-update.md`
+- Tags: `activity:implementation`, `status:completed`, `project:race-expert`, `task:vps-demo-rozetka-ai-style`, `topic:ui-design`, `topic:web-search`, `topic:tavily`, `topic:clean-answers`, `file:app/templates/index.html`, `file:app/static/app.js`, `file:app/assistant.py`, `file:app/search_evidence.py`, `file:app/openai_client.py`, `file:tests/test_web_search.py`
 - Status: `completed`
-
-## [2026-11-23] session | Add Product QA streaming and typing
-
-- Raw: `raw/sessions/2026-11-23-add-product-qa-streaming-and-typing.md`
-- Tags: `activity:implementation`, `status:completed`, `project:race-expert`, `task:product-qa-streaming`, `component:product-qa-api`, `component:local-qa-ui`, `topic:sse`, `file:app/main.py`, `file:app/assistant.py`, `file:app/openai_client.py`, `file:app/static/app.js`, `file:docs/api/product-qa-integration.md`, `file:docs/api/product-qa-v1.yaml`, `file:tests/test_streaming.py`, `file:wiki/session-handoff.md`
-- Status: `completed`
+- Description: Реализован и развернут на VPS live demo интерфейс в фирменном стиле Race Expert (логотип, навигация, палитра #253237 и #3960FF, боковое модальное окно консультанта «Race Expert AI» в стиле Rozetka AI, чипы предзаготовленных вопросов, поле ввода артикула и поиск товара в реальной базе OpenCart). Устранено дублирование индикатора печати. Добавлена локальная отдача картинок товаров. Реализован контекст предыдущих реплик диалога (до 3 последних ходов). Устранена мета-фразировка («На товарі зазначено...», «В картці вказано...») во всех ответах модели. Настроено автоматическое обращение к Tavily Search по белому списку доменов производителей (включая scienceinsport.com для бренда SiS) при вопросах о бренде или нехватке данных в карточке. Все 180 тестов пройдены успешно, деплой на VPS протестирован в live-режиме.
 
 
-## [2026-11-23] session | Publish Product QA streaming handoff
+## [2026-11-23] session | Deploy Rozetka-AI style demo with sports skills, intent classifier, and 24-category questions matrix
 
-- Raw: `raw/sessions/2026-11-23-publish-product-qa-streaming-handoff.md`
-- Tags: `activity:documentation`, `status:completed`, `project:race-expert`, `task:product-qa-handoff`, `component:product-qa-api`, `topic:github-handoff`, `file:docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md`, `file:wiki/sources/race-expert-qa-project.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/session-handoff.md`, `file:wiki/log.md`
-- Status: `completed`
-
-## [2026-11-23] session | Record Product QA implementation and GitHub handoff in Wiki
-
-- Raw: `raw/sessions/2026-11-23-record-product-qa-implementation-and-github-hand.md`
-- Tags: `activity:documentation`, `status:completed`, `project:race-expert`, `task:product-qa-handoff-memory`, `component:product-qa-api`, `topic:streaming`, `topic:production-readiness`, `topic:github-handoff`, `file:wiki/index.md`, `file:wiki/sources/race-expert-qa-project.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/content-index.jsonl`, `file:wiki/session-handoff.md`, `file:wiki/log.md`
+- Raw: `raw/sessions/2026-11-23-deploy-rozetka-ai-style-demo-with-sports-skills-.md`
+- Tags: `activity:implementation`, `status:completed`, `project:race-expert`, `task:rozetka-ai-demo-and-sports-skills`, `topic:ui-redesign`, `topic:intent-classifier`, `topic:sports-nutrition`, `topic:suggested-questions`, `topic:vps-deployment`, `file:app/intent_classifier.py`, `file:app/suggested_questions.py`, `file:app/main.py`, `file:app/static/app.js`, `file:app/templates/index.html`
 - Status: `completed`

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import socket
+import time
 from dataclasses import dataclass
 from typing import Callable, Sequence
 from urllib.error import HTTPError, URLError
@@ -54,9 +55,13 @@ class TavilySearchClient:
         api_key: str | None,
         *,
         opener: Callable[..., object] = urlopen,
+        retries: int = 1,
+        retry_delay: float = 0.05,
     ) -> None:
         self._api_key = api_key.strip() if isinstance(api_key, str) else ""
         self._opener = opener
+        self._retries = retries
+        self._retry_delay = retry_delay
 
     def search(self, query: str, include_domains: Sequence[str]) -> list[SearchResult]:
         if not self._api_key:
@@ -90,26 +95,49 @@ class TavilySearchClient:
             method="POST",
         )
 
-        try:
-            response = self._opener(request, timeout=SEARCH_TIMEOUT_SECONDS)
+        payload = None
+        for attempt in range(self._retries + 1):
             try:
-                payload = response.read(_MAX_RESPONSE_BYTES + 1)
-            finally:
-                close = getattr(response, "close", None)
-                if callable(close):
-                    close()
-        except (TimeoutError, socket.timeout):
-            raise SearchProviderError("search_timeout") from None
-        except HTTPError:
-            raise SearchProviderError("search_provider_error") from None
-        except URLError as error:
-            if isinstance(error.reason, (TimeoutError, socket.timeout)):
+                response = self._opener(request, timeout=SEARCH_TIMEOUT_SECONDS)
+                try:
+                    payload = response.read(_MAX_RESPONSE_BYTES + 1)
+                finally:
+                    close = getattr(response, "close", None)
+                    if callable(close):
+                        close()
+                break
+            except (TimeoutError, socket.timeout):
+                if attempt < self._retries:
+                    if self._retry_delay > 0:
+                        time.sleep(self._retry_delay)
+                    continue
                 raise SearchProviderError("search_timeout") from None
-            raise SearchProviderError("search_provider_error") from None
-        except OSError:
-            raise SearchProviderError("search_provider_error") from None
-        except Exception:
-            raise SearchProviderError("search_provider_error") from None
+            except HTTPError as error:
+                if attempt < self._retries and error.code in {429, 500, 502, 503, 504}:
+                    if self._retry_delay > 0:
+                        time.sleep(self._retry_delay)
+                    continue
+                raise SearchProviderError("search_provider_error") from None
+            except URLError as error:
+                if isinstance(error.reason, (TimeoutError, socket.timeout)):
+                    if attempt < self._retries:
+                        if self._retry_delay > 0:
+                            time.sleep(self._retry_delay)
+                        continue
+                    raise SearchProviderError("search_timeout") from None
+                if attempt < self._retries:
+                    if self._retry_delay > 0:
+                        time.sleep(self._retry_delay)
+                    continue
+                raise SearchProviderError("search_provider_error") from None
+            except OSError:
+                if attempt < self._retries:
+                    if self._retry_delay > 0:
+                        time.sleep(self._retry_delay)
+                    continue
+                raise SearchProviderError("search_provider_error") from None
+            except Exception:
+                raise SearchProviderError("search_provider_error") from None
 
         if not isinstance(payload, bytes) or len(payload) > _MAX_RESPONSE_BYTES:
             raise SearchProviderError("search_invalid_response")

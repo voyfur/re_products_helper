@@ -161,16 +161,29 @@ class _DescriptionTextParser(HTMLParser):
         return re.sub(r"\s+", " ", value).strip()
 
 
-def html_to_safe_text(description: str | None) -> str:
+MAX_DESCRIPTION_LENGTH = 10_000
+
+
+def html_to_safe_text(
+    description: str | None, *, max_length: int | None = None
+) -> str:
     if not description:
         return ""
     parser = _DescriptionTextParser()
     parser.feed(description)
     parser.close()
-    return parser.text()
+    text = parser.text()
+    if max_length is not None and len(text) > max_length:
+        text = text[:max_length].rsplit(" ", 1)[0].rstrip() + "..."
+    return text
 
 
 def build_model_context(product: Product, language: str) -> str:
+    is_uk = language.casefold().replace("_", "-").startswith("uk")
+    name_label = "Назва" if is_uk else "Название"
+    desc_label = "Опис" if is_uk else "Описание"
+    stock_label_prefix = "Наявність" if is_uk else "Наличие"
+
     lines = [f"Артикул: {product.article}"]
     if product.model:
         lines.append(f"Модель: {product.model}")
@@ -182,13 +195,15 @@ def build_model_context(product: Product, language: str) -> str:
         return "\n".join(lines)
 
     if localized.name:
-        lines.append(f"Название: {localized.name}")
-    description = html_to_safe_text(localized.description)
+        lines.append(f"{name_label}: {localized.name}")
+    description = html_to_safe_text(
+        localized.description, max_length=MAX_DESCRIPTION_LENGTH
+    )
     if description:
-        lines.append(f"Описание: {description}")
+        lines.append(f"{desc_label}: {description}")
     for attribute in localized.attributes:
         if attribute.name and attribute.value:
             lines.append(f"{attribute.name}: {attribute.value}")
     if localized.stock_label:
-        lines.append(f"Наличие: {localized.stock_label}")
+        lines.append(f"{stock_label_prefix}: {localized.stock_label}")
     return "\n".join(lines)

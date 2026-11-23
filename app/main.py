@@ -20,7 +20,11 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.assistant import AssistantService, QuestionRejected, load_system_prompt
-from app.catalog import OpenCartCatalog, create_mysql_connection
+from app.catalog import (
+    OpenCartCatalog,
+    create_mysql_connection,
+    create_mysql_connection_factory,
+)
 from app.config import Settings
 from app.conversation import ConversationMessage, MAX_PRIOR_MESSAGES
 from app.journal import Journal, JournalAttempt
@@ -28,6 +32,7 @@ from app.openai_client import OpenAIResponsesClient
 from app.product_context import LanguageCard, Product, html_to_safe_text
 from app.security import AskBodySizeLimit, security_headers
 from app.search_provider import TavilySearchClient
+from app.suggested_questions import get_suggested_questions
 
 
 BASE_PATH = Path(__file__).parent
@@ -166,6 +171,7 @@ def create_app(
         "journal": journal,
         "assistant": assistant,
     }
+    services_lock = threading.Lock()
 
     def get_runtime_settings() -> Settings:
         nonlocal runtime_settings
@@ -176,23 +182,26 @@ def create_app(
     def get_services() -> dict[str, Any]:
         if all(services[name] is not None for name in ("catalog", "journal", "assistant")):
             return services
-        active_settings = get_runtime_settings()
-        active_journal = services["journal"] or Journal(active_settings.journal_path)
-        active_catalog = services["catalog"] or OpenCartCatalog(
-            lambda: create_mysql_connection(active_settings.mysql)
-        )
-        active_assistant = services["assistant"] or AssistantService(
-            active_journal,
-            OpenAIResponsesClient(active_settings.openai_api_key),
-            system_prompt=load_system_prompt(),
-            search_client=TavilySearchClient(active_settings.tavily_api_key),
-        )
-        services.update(
-            catalog=active_catalog,
-            journal=active_journal,
-            assistant=active_assistant,
-        )
-        return services
+        with services_lock:
+            if all(services[name] is not None for name in ("catalog", "journal", "assistant")):
+                return services
+            active_settings = get_runtime_settings()
+            active_journal = services["journal"] or Journal(active_settings.journal_path)
+            active_catalog = services["catalog"] or OpenCartCatalog(
+                create_mysql_connection_factory(active_settings.mysql)
+            )
+            active_assistant = services["assistant"] or AssistantService(
+                active_journal,
+                OpenAIResponsesClient(active_settings.openai_api_key),
+                system_prompt=load_system_prompt(),
+                search_client=TavilySearchClient(active_settings.tavily_api_key),
+            )
+            services.update(
+                catalog=active_catalog,
+                journal=active_journal,
+                assistant=active_assistant,
+            )
+            return services
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(AskBodySizeLimit)
@@ -497,6 +506,7 @@ def _product_payload(product: Product) -> dict[str, Any]:
             language: _language_payload(card)
             for language, card in product.languages.items()
         },
+        "suggested_questions": get_suggested_questions(product),
     }
 
 

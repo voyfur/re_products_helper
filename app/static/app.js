@@ -1,341 +1,502 @@
-const searchForm = document.querySelector("#search-form");
-const articleInput = document.querySelector("#article-input");
-const searchButton = document.querySelector("#search-button");
-const searchMessage = document.querySelector("#search-message");
-const candidateList = document.querySelector("#candidate-list");
-const productPanel = document.querySelector("#product-panel");
-const productTitle = document.querySelector("#product-title");
-const productCode = document.querySelector("#product-code");
-const productStock = document.querySelector("#product-stock");
-const productDescription = document.querySelector("#product-description");
-const productFacts = document.querySelector("#product-facts");
-const productAttributes = document.querySelector("#product-attributes");
-const questionForm = document.querySelector("#question-form");
-const questionInput = document.querySelector("#question-input");
-const questionCounter = document.querySelector("#question-counter");
-const askButton = document.querySelector("#ask-button");
-const questionMessage = document.querySelector("#question-message");
-const latestAnswer = document.querySelector("#latest-answer");
-const typingIndicator = document.querySelector("#typing-indicator");
-const suggestionChips = document.querySelectorAll(".suggestion-chip");
+/**
+ * Race Expert AI - Storefront & Interactive Consultation Drawer
+ * Visual Identity: Pure Race Expert Brand
+ * Functional Pattern: Left Drawer with Suggested Chips & Typewriter Streaming
+ */
 
-let selectedProduct = null;
-let searchToken = 0;
-let conversationHistory = [];
-let activeAnswerText = null;
-let activeAskController = null;
+// Elements - Drawer & Controls
+const drawer = document.getElementById("ai-drawer");
+const backdrop = document.getElementById("drawer-backdrop");
+const btnTriggerAi = document.getElementById("btn-trigger-ai");
+const btnFloatingAi = document.getElementById("btn-floating-ai");
+const btnTabTriggerAi = document.getElementById("btn-tab-trigger-ai");
+const btnDrawerClose = document.getElementById("btn-drawer-close");
+const drawerBody = document.getElementById("drawer-body");
 
-function setMessage(node, text, kind = "") {
-  node.textContent = text;
-  node.className = kind ? "message " + kind : "message";
+// Elements - Article Switcher in Drawer
+const drawerSkuInput = document.getElementById("drawer-sku-input");
+const btnLoadSku = document.getElementById("btn-load-sku");
+const artChips = document.querySelectorAll(".art-chip");
+
+// Elements - Drawer Product Preview Card
+const drawerProductImg = document.getElementById("drawer-product-img");
+const drawerProductTitle = document.getElementById("drawer-product-title");
+const drawerProductPrice = document.getElementById("drawer-product-price");
+const drawerStockBadge = document.getElementById("drawer-stock-badge");
+
+// Elements - Showcase Storefront Page
+const showcaseTitle = document.getElementById("showcase-title");
+const showcaseSku = document.getElementById("showcase-sku");
+const specsSku = document.getElementById("specs-sku");
+const showcasePrice = document.getElementById("showcase-price");
+const showcaseDescription = document.getElementById("showcase-description");
+const showcaseStockLabel = document.getElementById("showcase-stock-label");
+const mainProductImg = document.getElementById("main-product-img");
+const breadcrumbProductName = document.getElementById("breadcrumb-product-name");
+
+// Elements - Chat & Composer
+const chatMessages = document.getElementById("chat-messages");
+const typingIndicator = document.getElementById("typing-indicator");
+const composerForm = document.getElementById("chat-composer-form");
+const composerInput = document.getElementById("composer-user-input");
+const suggestedChipsFlow = document.getElementById("suggested-chips-flow");
+
+// Quantity Spinner
+const qtyMinus = document.getElementById("qty-minus");
+const qtyPlus = document.getElementById("qty-plus");
+const qtyVal = document.getElementById("qty-val");
+
+// State
+let currentProduct = null;
+let isGenerating = false;
+let dialogHistory = [];
+const WAITING_COPY = "Готуємо відповідь про вибраний товар…";
+
+// Product Images Mapping
+const DEMO_IMAGES = {
+  RE0126: "static/images/RE0126.jpg",
+  RE1050: "static/images/RE1050.png",
+  RE0518: "static/images/RE0518.jpg",
+  RE0508: "static/images/RE0508.jpg",
+  RE0537: "static/images/RE0537.png",
+  RE0731: "static/images/RE0731.jpg",
+};
+
+// --- Drawer Open / Close Functions ---
+function openDrawer() {
+  if (!drawer || !backdrop) return;
+  drawer.classList.add("is-open");
+  backdrop.classList.add("is-active");
+  drawer.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => composerInput && composerInput.focus(), 250);
 }
 
-function textElement(tag, className, value) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  node.textContent = value || "";
-  return node;
+function closeDrawer() {
+  if (!drawer || !backdrop) return;
+  drawer.classList.remove("is-open");
+  backdrop.classList.remove("is-active");
+  drawer.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
 }
 
-function ukrainianCard(product) {
-  return product.languages && product.languages.uk;
-}
+// Drawer Listeners
+if (btnTriggerAi) btnTriggerAi.addEventListener("click", openDrawer);
+if (btnFloatingAi) btnFloatingAi.addEventListener("click", openDrawer);
+if (btnTabTriggerAi) btnTabTriggerAi.addEventListener("click", openDrawer);
+if (btnDrawerClose) btnDrawerClose.addEventListener("click", closeDrawer);
+if (backdrop) backdrop.addEventListener("click", closeDrawer);
 
-function productName(product) {
-  const card = ukrainianCard(product);
-  return (card && card.name) || product.model || product.sku || product.article;
-}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && drawer && drawer.classList.contains("is-open")) {
+    closeDrawer();
+  }
+});
 
-function productCodeLine(product) {
-  return [
-    product.article && "Артикул " + product.article,
-    product.model && product.model !== product.article && "Модель " + product.model,
-    product.sku && "SKU " + product.sku,
-  ].filter(Boolean).join(" · ");
+// --- Product Loading & Switching ---
+async function loadProductByArticle(article) {
+  const cleanArticle = (article || "").trim().toUpperCase();
+  if (!cleanArticle) return;
+
+  if (btnLoadSku) {
+    btnLoadSku.disabled = true;
+    btnLoadSku.textContent = "Пошук...";
+  }
+
+  try {
+    const res = await fetch(`api/search?article=${encodeURIComponent(cleanArticle)}`);
+    if (!res.ok) throw new Error("Помилка завантаження");
+    const data = await res.json();
+
+    let product = null;
+    if (data.status === "single" && data.product) {
+      product = data.product;
+    } else if (data.status === "ambiguous" && data.candidates && data.candidates.length > 0) {
+      product = data.candidates[0];
+    }
+
+    if (product) {
+      currentProduct = product;
+      dialogHistory = [];
+      renderProduct(product);
+      updateActiveChip(cleanArticle);
+    } else {
+      alert(`Товар з артикулом "${cleanArticle}" не знайдено в каталозі OpenCart.`);
+    }
+  } catch (err) {
+    console.error("Search error:", err);
+    alert("Не вдалося завантажити товар. Перевірте з'єднання із сервером.");
+  } finally {
+    if (btnLoadSku) {
+      btnLoadSku.disabled = false;
+      btnLoadSku.textContent = "Знайти";
+    }
+  }
 }
 
 function renderProduct(product) {
-  if (!selectedProduct || selectedProduct.product_id !== product.product_id) {
-    conversationHistory = [];
-  }
-  selectedProduct = product;
-  const card = ukrainianCard(product);
-  productPanel.hidden = false;
-  productTitle.textContent = productName(product);
-  productCode.textContent = productCodeLine(product);
+  const ukCard = (product.languages && product.languages.uk) || (product.languages && product.languages.ru) || {};
+  const name = ukCard.name || product.model || product.article;
+  const article = product.article || product.model || "";
+  const stock = ukCard.stock_label || "Є в наявності";
+  const desc = ukCard.description || "Опис товару доступний за запитом.";
+  const imgUrl = DEMO_IMAGES[article] || "https://placehold.co/600x600/f8fafc/253237?text=Race+Expert";
 
-  productStock.textContent = card && card.stock_label ? card.stock_label : "";
-  productStock.hidden = !productStock.textContent;
+  // Update Drawer Mini Card
+  if (drawerProductTitle) drawerProductTitle.textContent = name;
+  if (drawerProductImg) drawerProductImg.src = imgUrl;
+  if (drawerStockBadge) drawerStockBadge.textContent = stock;
+  if (drawerSkuInput) drawerSkuInput.value = article;
 
-  productDescription.textContent = card && card.description ? card.description : "";
-  productDescription.hidden = !productDescription.textContent;
+  // Update Storefront Page
+  if (showcaseTitle) showcaseTitle.textContent = name;
+  if (showcaseSku) showcaseSku.textContent = article;
+  if (specsSku) specsSku.textContent = article;
+  if (breadcrumbProductName) breadcrumbProductName.textContent = name;
+  if (showcaseStockLabel) showcaseStockLabel.textContent = stock;
+  if (mainProductImg) mainProductImg.src = imgUrl;
+  if (showcaseDescription) showcaseDescription.textContent = desc;
 
-  productAttributes.replaceChildren();
-  const attributes = ((card && card.attributes) || []).filter(
-    (attribute) => !["артикул", "модель", "sku"].includes((attribute.name || "").trim().toLowerCase()),
-  );
-  attributes.forEach((attribute) => {
-    productAttributes.append(
-      textElement("dt", "", attribute.name),
-      textElement("dd", "", attribute.value),
-    );
-  });
-  productFacts.hidden = attributes.length === 0;
+  // Price formatting
+  const price = article === "RE0126" ? "2299" : (article === "RE0731" ? "108" : "1150");
+  if (showcasePrice) showcasePrice.textContent = price;
+  if (drawerProductPrice) drawerProductPrice.textContent = `${price} грн`;
 
-  questionInput.disabled = false;
-  askButton.disabled = false;
-  latestAnswer.hidden = true;
-  latestAnswer.replaceChildren();
-  activeAnswerText = null;
-  typingIndicator.hidden = true;
-  questionInput.value = "";
-  updateQuestionCounter();
-  setMessage(questionMessage, "");
+  // Render Suggested Quick Questions (6 per group/subgroup)
+  renderSuggestedQuestions(product.suggested_questions);
 }
 
-function renderCandidates(products) {
-  candidateList.replaceChildren();
-  products.forEach((product) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "candidate-option";
-    button.append(
-      textElement("strong", "", productName(product)),
-      textElement("span", "candidate-meta", productCodeLine(product)),
-    );
-    button.addEventListener("click", () => {
-      candidateList.hidden = true;
-      renderProduct(product);
-      setMessage(searchMessage, "Товар вибрано.", "success");
+function renderSuggestedQuestions(questions) {
+  const container = document.querySelector(".suggested-chips-flow") || document.getElementById("suggested-chips-flow");
+  if (!container) return;
+  const list = Array.isArray(questions) && questions.length > 0 ? questions : [
+    "Як правильно застосовувати цей товар за інструкцією виробника?",
+    "Які головні переваги та особливості цього продукту?",
+    "Для яких видів тренувань або цілей він підходить найкраще?",
+    "Який точний склад, вага та розмір цієї упаковки?",
+    "Чи є додаткові смаки або варіанти цього товару в наявності?",
+    "Чи сумісний цей товар з іншим щоденним спортивним харчуванням?"
+  ];
+
+  container.innerHTML = "";
+  list.forEach((q) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "prompt-chip";
+    btn.setAttribute("data-question", q);
+    btn.textContent = q;
+    btn.addEventListener("click", () => {
+      askQuestion(q);
     });
-    candidateList.append(button);
+    container.appendChild(btn);
   });
-  candidateList.hidden = false;
 }
 
-async function searchProduct(article) {
-  const token = ++searchToken;
-  if (activeAskController) {
-    activeAskController.abort();
-    activeAskController = null;
-  }
-  conversationHistory = [];
-  selectedProduct = null;
-  productPanel.hidden = true;
-  candidateList.replaceChildren();
-  candidateList.hidden = true;
-  searchButton.disabled = true;
-  setMessage(searchMessage, "Шукаємо точний збіг…");
-
-  try {
-    const response = await fetch("/api/search?article=" + encodeURIComponent(article), {
-      headers: { Accept: "application/json" },
-    });
-    const result = await response.json();
-    if (token !== searchToken) return;
-    if (!response.ok) throw new Error(result.error || "catalog_unavailable");
-
-    if (result.status === "not_found") {
-      setMessage(searchMessage, "Збігів немає. Перевірте введені дані й повторіть пошук.", "error");
-    } else if (result.status === "single") {
-      renderProduct(result.product);
-      setMessage(searchMessage, "Товар підтверджено.", "success");
-    } else if (result.status === "ambiguous") {
-      renderCandidates(result.candidates || []);
-      setMessage(searchMessage, "Є кілька точних збігів. Виберіть потрібний товар.", "error");
+function updateActiveChip(article) {
+  artChips.forEach((chip) => {
+    if (chip.getAttribute("data-article") === article) {
+      chip.classList.add("active");
     } else {
-      throw new Error("catalog_unavailable");
+      chip.classList.remove("active");
     }
-  } catch {
-    if (token === searchToken) {
-      setMessage(searchMessage, "Не вдалося виконати пошук. Перевірте підключення й повторіть спробу.", "error");
-    }
-  } finally {
-    if (token === searchToken) searchButton.disabled = false;
-  }
+  });
 }
 
-searchForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const article = articleInput.value.trim();
-  if (article) void searchProduct(article);
-});
-
-function updateQuestionCounter() {
-  questionCounter.textContent = questionInput.value.length + " / 2000";
+// Article Search Events
+if (btnLoadSku) {
+  btnLoadSku.addEventListener("click", () => {
+    loadProductByArticle(drawerSkuInput.value);
+  });
 }
 
-questionInput.addEventListener("input", updateQuestionCounter);
+if (drawerSkuInput) {
+  drawerSkuInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      loadProductByArticle(drawerSkuInput.value);
+    }
+  });
+}
 
-suggestionChips.forEach((chip) => {
+artChips.forEach((chip) => {
   chip.addEventListener("click", () => {
-    if (!selectedProduct) return;
-    questionInput.value = chip.textContent.trim();
-    updateQuestionCounter();
-    questionInput.focus();
+    const art = chip.getAttribute("data-article");
+    if (art) loadProductByArticle(art);
   });
 });
 
-function prepareAnswer() {
-  if (activeAnswerText) return;
-  latestAnswer.replaceChildren();
-  latestAnswer.dataset.status = "succeeded";
-  latestAnswer.hidden = false;
-  latestAnswer.append(
-    textElement("p", "answer-kicker", "ВІДПОВІДЬ"),
-    textElement("p", "answer-text", ""),
-  );
-  activeAnswerText = latestAnswer.querySelector(".answer-text");
+// --- Typing Indicator Helpers ---
+function showTypingIndicator() {
+  if (!typingIndicator) return;
+  typingIndicator.removeAttribute("hidden");
+  typingIndicator.classList.add("is-active");
+  typingIndicator.style.setProperty("display", "flex", "important");
+  scrollDrawerToBottom();
 }
 
-function appendAnswerDelta(text) {
-  prepareAnswer();
-  activeAnswerText.textContent += text;
+function hideTypingIndicator() {
+  if (!typingIndicator) return;
+  typingIndicator.setAttribute("hidden", "true");
+  typingIndicator.classList.remove("is-active");
+  typingIndicator.style.setProperty("display", "none", "important");
 }
 
-function replaceAnswer(answer) {
-  prepareAnswer();
-  activeAnswerText.textContent = answer;
-}
-
-function clearPartialAnswer() {
-  latestAnswer.replaceChildren();
-  latestAnswer.hidden = true;
-  activeAnswerText = null;
-}
-
-async function readSseStream(response, onEvent) {
-  if (!response.body || !response.body.getReader) {
-    throw new Error("answer_unavailable");
+// Dialog Context Helper
+function formatQuestionWithHistory(rawQuestion, history) {
+  const current = (rawQuestion || "").trim();
+  if (!history || history.length === 0) {
+    return current;
   }
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  function dispatchFrame(frame) {
-    let eventName = "message";
-    const dataLines = [];
-    frame.split("\n").forEach((line) => {
-      if (line.startsWith("event:")) eventName = line.slice(6).trim();
-      if (line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());
-    });
-    if (!dataLines.length) return;
-    onEvent(eventName, JSON.parse(dataLines.join("\n")));
+  const recentTurns = history.slice(-3);
+  let contextStr = "Контекст попередньої розмови:\n";
+  for (const turn of recentTurns) {
+    contextStr += `- Покупець: ${turn.question}\n`;
+    contextStr += `- Консультант: ${turn.answer}\n`;
   }
+  contextStr += `\nПоточне повідомлення покупця: ${current}`;
 
-  while (true) {
-    const { value, done } = await reader.read();
-    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
-    buffer = buffer.replace(/\r\n/g, "\n");
-    let boundary = buffer.indexOf("\n\n");
-    while (boundary >= 0) {
-      dispatchFrame(buffer.slice(0, boundary));
-      buffer = buffer.slice(boundary + 2);
-      boundary = buffer.indexOf("\n\n");
-    }
-    if (done) break;
+  if (contextStr.length > 1850) {
+    const lastTurn = recentTurns[recentTurns.length - 1];
+    return `Контекст попередньої розмови:\n- Покупець: ${lastTurn.question}\n- Консультант: ${lastTurn.answer}\n\nПоточне повідомлення покупця: ${current}`;
   }
-  if (buffer.trim()) dispatchFrame(buffer);
+  return contextStr;
 }
 
-function askRequestBody(question) {
-  const payload = {
-    article: selectedProduct.article,
-    product_id: selectedProduct.product_id,
-    question,
-    history: conversationHistory.slice(-9).map(({ role, content }) => ({ role, content })),
-  };
-  let body = JSON.stringify(payload);
-  while (new TextEncoder().encode(body).length > 16_384 && payload.history.length > 0) {
-    payload.history.shift();
-    body = JSON.stringify(payload);
-  }
-  return body;
-}
+// --- Chat & Questions Handling ---
+async function askQuestion(questionText) {
+  const text = (questionText || "").trim();
+  if (!text || isGenerating || !currentProduct) return;
 
-questionForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const question = questionInput.value.trim();
-  if (!selectedProduct || !question) return;
-  const submittedProductId = selectedProduct.product_id;
-  const controller = new AbortController();
-  activeAskController = controller;
+  isGenerating = true;
 
-  askButton.disabled = true;
-  questionInput.disabled = true;
-  searchButton.disabled = true;
-  latestAnswer.hidden = true;
-  latestAnswer.replaceChildren();
-  activeAnswerText = null;
-  typingIndicator.hidden = false;
-  setMessage(questionMessage, "Готуємо відповідь про вибраний товар…");
+  // 1. Append User Message
+  appendUserMessage(text);
+  if (composerInput) composerInput.value = "";
+
+  // 2. Show Typing Indicator
+  showTypingIndicator();
 
   try {
-    const response = await fetch("/api/ask/stream", {
+    const questionWithContext = formatQuestionWithHistory(text, dialogHistory);
+
+    const payload = {
+      article: currentProduct.article,
+      product_id: currentProduct.product_id,
+      question: questionWithContext,
+    };
+
+    const res = await fetch("api/ask", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
-      body: askRequestBody(question),
-      signal: controller.signal,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
-    if (!response.ok) {
-      const body = await response.json();
-      const messages = {
-        product_selection_required: "Вибраний товар змінився. Знайдіть його ще раз.",
-        product_not_found: "Товар більше не знайдено. Виконайте пошук ще раз.",
-        catalog_unavailable: "Каталог тимчасово недоступний. Спробуйте пізніше.",
-      };
-      setMessage(questionMessage, messages[body.error] || "Не вдалося надіслати запитання. Спробуйте ще раз.", "error");
-      return;
+
+    const data = await res.json();
+    hideTypingIndicator();
+
+    if (res.ok && data.attempt && data.attempt.answer) {
+      dialogHistory.push({
+        question: text,
+        answer: data.attempt.answer,
+      });
+      await appendAssistantMessageWithTypewriter(data.attempt.answer);
+    } else if (data.error) {
+      appendAssistantMessage(mapErrorMessage(data.error));
+    } else {
+      appendAssistantMessage("Не вдалося сформувати відповідь. Будь ласка, спробуйте ще раз або зверніться до менеджера Race Expert.");
     }
-    if (!(response.headers.get("content-type") || "").includes("text/event-stream")) {
-      throw new Error("answer_unavailable");
-    }
-    let completed = false;
-    let failed = false;
-    await readSseStream(response, (eventName, payload) => {
-      if (eventName === "delta" && typeof payload.text === "string") {
-        appendAnswerDelta(payload.text);
-      } else if (eventName === "replace" && typeof payload.answer === "string") {
-        replaceAnswer(payload.answer);
-      } else if (eventName === "done" && payload.status === "succeeded") {
-        completed = true;
-      } else if (eventName === "error") {
-        failed = true;
-        clearPartialAnswer();
-      }
-    });
-    if (failed || !completed) {
-      clearPartialAnswer();
-      setMessage(questionMessage, "Не вдалося отримати відповідь. Спробуйте ще раз.", "error");
-      return;
-    }
-    if (!selectedProduct || selectedProduct.product_id !== submittedProductId) return;
-    const answer = activeAnswerText ? activeAnswerText.textContent : "";
-    if (answer) {
-      conversationHistory.push(
-        { role: "user", content: question },
-        { role: "assistant", content: answer },
-      );
-      conversationHistory = conversationHistory.slice(-10);
-    }
-    setMessage(questionMessage, "Готово.", "success");
-  } catch (error) {
-    if (error.name === "AbortError") return;
-    clearPartialAnswer();
-    setMessage(questionMessage, "Не вдалося зв’язатися із сервісом. Перевірте підключення й повторіть спробу.", "error");
+  } catch (err) {
+    console.error("Ask error:", err);
+    hideTypingIndicator();
+    appendAssistantMessage("Сталася тимчасова помилка зв'язку із сервером відповідей. Спробуйте ще раз через хвилину.");
   } finally {
-    if (activeAskController === controller) activeAskController = null;
-    if (selectedProduct && selectedProduct.product_id === submittedProductId) {
-      typingIndicator.hidden = true;
-    }
-    questionInput.disabled = !selectedProduct;
-    askButton.disabled = !selectedProduct;
-    searchButton.disabled = false;
+    hideTypingIndicator();
+    isGenerating = false;
+    scrollDrawerToBottom();
   }
+}
+
+function mapErrorMessage(code) {
+  switch (code) {
+    case "product_not_found":
+      return "Інформацію про цей товар не знайдено в базі даних Race Expert.";
+    case "rate_limited":
+      return "Забагато запитань за короткий час. Будь ласка, зачекайте хвилину перед наступним запитанням.";
+    case "request_too_large":
+      return "Ваше запитання занадто велике за обсягом. Сформулюйте його коротше.";
+    case "catalog_unavailable":
+      return "База даних OpenCart тимчасово недоступна. Будь ласка, спробуйте пізніше.";
+    default:
+      return "Наразі не вдалося сформувати відповідь. Будь ласка, перефразуйте запитання.";
+  }
+}
+
+function appendUserMessage(text) {
+  const msgRow = document.createElement("div");
+  msgRow.className = "message-bubble user-bubble";
+
+  const content = document.createElement("div");
+  content.className = "bubble-content";
+
+  const bubbleText = document.createElement("div");
+  bubbleText.className = "bubble-text";
+  bubbleText.textContent = text;
+
+  content.appendChild(bubbleText);
+  msgRow.appendChild(content);
+  chatMessages.appendChild(msgRow);
+  scrollDrawerToBottom();
+}
+
+async function appendAssistantMessageWithTypewriter(fullText) {
+  const msgRow = document.createElement("div");
+  msgRow.className = "message-bubble assistant-bubble";
+
+  const avatar = document.createElement("div");
+  avatar.className = "bubble-avatar";
+  avatar.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF"/></svg>`;
+
+  const content = document.createElement("div");
+  content.className = "bubble-content";
+
+  const bubbleText = document.createElement("div");
+  bubbleText.className = "bubble-text";
+
+  content.appendChild(bubbleText);
+  msgRow.appendChild(avatar);
+  msgRow.appendChild(content);
+  chatMessages.appendChild(msgRow);
+
+  // Fast typewriter streaming
+  const words = fullText.split(" ");
+  let currentString = "";
+
+  for (let i = 0; i < words.length; i++) {
+    currentString += (i > 0 ? " " : "") + words[i];
+    bubbleText.textContent = currentString;
+    scrollDrawerToBottom();
+    await new Promise((resolve) => setTimeout(resolve, 18));
+  }
+}
+
+function appendAssistantMessage(fullText) {
+  const msgRow = document.createElement("div");
+  msgRow.className = "message-bubble assistant-bubble";
+
+  const avatar = document.createElement("div");
+  avatar.className = "bubble-avatar";
+  avatar.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF"/></svg>`;
+
+  const content = document.createElement("div");
+  content.className = "bubble-content";
+
+  const bubbleText = document.createElement("div");
+  bubbleText.className = "bubble-text";
+  bubbleText.textContent = fullText;
+
+  content.appendChild(bubbleText);
+  msgRow.appendChild(avatar);
+  msgRow.appendChild(content);
+  chatMessages.appendChild(msgRow);
+  scrollDrawerToBottom();
+}
+
+function scrollDrawerToBottom() {
+  if (drawerBody) {
+    drawerBody.scrollTop = drawerBody.scrollHeight;
+  }
+}
+
+// Suggested Prompt Chips (bind initial chips)
+if (suggestedChipsFlow) {
+  suggestedChipsFlow.querySelectorAll(".prompt-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const q = chip.getAttribute("data-question");
+      if (q) askQuestion(q);
+    });
+  });
+}
+
+// Composer Form Submit
+if (composerForm) {
+  composerForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (composerInput) askQuestion(composerInput.value);
+  });
+}
+
+// Action Chips
+const chipClearChat = document.getElementById("chip-clear-chat");
+if (chipClearChat) {
+  chipClearChat.addEventListener("click", () => {
+    dialogHistory = [];
+    hideTypingIndicator();
+    chatMessages.innerHTML = `
+      <div class="message-bubble assistant-bubble">
+        <div class="bubble-avatar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF"/></svg>
+        </div>
+        <div class="bubble-content">
+          <div class="bubble-text">Діалог очищено. Поставте нове запитання про обраний товар або оберіть підказку вище.</div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+const chipShowDesc = document.getElementById("chip-show-desc");
+if (chipShowDesc) {
+  chipShowDesc.addEventListener("click", () => {
+    askQuestion("Коротко опиши цей товар та його головні переваги за описом.");
+  });
+}
+
+const chipShowFacts = document.getElementById("chip-show-facts");
+if (chipShowFacts) {
+  chipShowFacts.addEventListener("click", () => {
+    askQuestion("Які точні характеристики, об'єм та форма випуску зазначені в картці?");
+  });
+}
+
+// Main Page Tabs Switching
+const tabButtons = document.querySelectorAll(".tab-nav-btn, .tab-btn");
+const tabContents = document.querySelectorAll(".tab-pane, .tab-content");
+
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const targetTab = btn.getAttribute("data-tab");
+    tabButtons.forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    tabContents.forEach((c) => {
+      c.hidden = c.id !== `tab-${targetTab}`;
+    });
+  });
 });
 
-const initialArticle = new URLSearchParams(window.location.search).get("article");
-if (initialArticle && initialArticle.trim()) {
-  articleInput.value = initialArticle.trim();
-  void searchProduct(articleInput.value);
+// Quantity Spinner Logic
+if (qtyMinus && qtyPlus && qtyVal) {
+  qtyMinus.addEventListener("click", () => {
+    let cur = parseInt(qtyVal.value, 10) || 1;
+    if (cur > 1) qtyVal.value = cur - 1;
+  });
+  qtyPlus.addEventListener("click", () => {
+    let cur = parseInt(qtyVal.value, 10) || 1;
+    qtyVal.value = cur + 1;
+  });
 }
+
+// Flavor Variation Chips
+const varChips = document.querySelectorAll(".var-chip");
+varChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    varChips.forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+  });
+});
+
+// Initial Product Load on Page Startup
+window.addEventListener("DOMContentLoaded", () => {
+  hideTypingIndicator();
+  loadProductByArticle("RE0126");
+});

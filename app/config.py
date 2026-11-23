@@ -33,6 +33,10 @@ class Settings:
             raise ValueError("tavily_configuration_invalid")
         if os.environ.get("PRODUCT_QA_API_KEY") and os.environ.get("PRODUCT_QA_API_KEY_FILE"):
             raise ValueError("product_qa_api_key_configuration_invalid")
+        if os.environ.get("OPENAI_API_KEY") and os.environ.get("OPENAI_API_KEY_FILE"):
+            raise ValueError("openai_configuration_invalid")
+        if os.environ.get("MYSQL_PASSWORD") and os.environ.get("MYSQL_PASSWORD_FILE"):
+            raise ValueError("mysql_configuration_invalid")
         try:
             port = int(os.environ.get("MYSQL_PORT", "3306"))
         except ValueError:

@@ -4,138 +4,489 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light">
-    <meta name="theme-color" content="#3675b3">
-    <title>Race Expert — запитання про товар</title>
-    <link rel="stylesheet" href="/static/app.css?v=qa-v4">
-    <script src="/static/app.js?v=qa-v4" defer></script>
+    <meta name="theme-color" content="#253237">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Напій енергетичний SiS Go Energy (чорна смородина) 1,6 кг — Race Expert</title>
+    <link rel="stylesheet" href="static/app.css?v=20261123-dyn-questions-v10">
+    <script src="static/app.js?v=20261123-dyn-questions-v10" defer></script>
   </head>
   <body>
-    <div class="topline">
-      <div class="topline-inner">Внутрішній тестовий інтерфейс Race Expert</div>
+    <!-- Top Announcement & Utility Bar (Race Expert Style) -->
+    <div class="top-nav-bar">
+      <div class="container top-nav-inner">
+        <ul class="top-nav-links">
+          <li><a href="https://raceexpert.com.ua/sportivnij-klub-race-expert" target="_blank" rel="noopener">Біговий клуб</a></li>
+          <li><a href="https://raceexpert.com.ua/about_us" target="_blank" rel="noopener">Про нас</a></li>
+          <li><a href="https://raceexpert.com.ua/contact/" target="_blank" rel="noopener">Контакти</a></li>
+          <li><a href="https://raceexpert.com.ua/dostavka-i-oplata" target="_blank" rel="noopener">Доставка і оплата</a></li>
+        </ul>
+        <div class="top-nav-right">
+          <span class="top-schedule">Пн-Сб: 09:00 - 19:00</span>
+          <div class="top-lang">
+            <span class="lang-option">RU</span>
+            <span class="lang-sep">|</span>
+            <span class="lang-option active">UA</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <header class="site-header">
-      <div class="header-inner">
-        <a class="brand" href="/" aria-label="Race Expert — помічник із товару">
-          <span class="brand-mark" aria-hidden="true">RE</span>
-          <span class="brand-name">RACE EXPERT</span>
-        </a>
-        <span class="header-label">ПИТАННЯ ПРО ТОВАР</span>
+
+    <!-- Main Header (Race Expert Exact Identity) -->
+    <header class="re-header">
+      <div class="container header-inner">
+        <!-- Official Logo & Slogan -->
+        <div class="re-logo-box">
+          <a href="./" class="re-logo-link" aria-label="Race Expert Головна">
+            <img src="static/images/re-logo.jpg" alt="Race Expert" class="re-logo-img">
+            <span class="re-logo-slogan">Здоров’я | Рух | Енергія</span>
+          </a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="re-header-search">
+          <input type="text" id="store-search-input" placeholder="Пошук спортивного харчування, ізотоніків, вітамінів..." autocomplete="off">
+          <button type="button" class="re-search-btn" aria-label="Знайти">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Знайти</span>
+          </button>
+        </div>
+
+        <!-- Phone & Cart -->
+        <div class="re-header-contacts-cart">
+          <div class="re-phone-block">
+            <a href="tel:+380688234690" class="re-phone-num">+380 (68) 823 46 90</a>
+            <span class="re-phone-label">Консультація експерта</span>
+          </div>
+          <div class="re-cart-block">
+            <div class="re-cart-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              <span class="re-cart-count">0</span>
+            </div>
+            <div class="re-cart-info">
+              <span class="re-cart-label">Кошик</span>
+              <span class="re-cart-sum">0 грн</span>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
-    <main class="shell">
-      <nav class="breadcrumb" aria-label="Навігаційний шлях">
-        <span>Race Expert</span>
-        <span class="breadcrumb-separator" aria-hidden="true">›</span>
-        <span>Помічник із товару</span>
-      </nav>
+    <!-- Main Navigation Menu (Race Expert Categories) -->
+    <nav class="re-nav-menu">
+      <div class="container nav-inner">
+        <ul class="re-menu-list">
+          <li class="active"><a href="#">Спортивне харчування</a></li>
+          <li><a href="#">Вітаміни і добавки</a></li>
+          <li><a href="#">Енергетики та вуглеводи</a></li>
+          <li><a href="#">Ізотоніки та гідратація</a></li>
+          <li><a href="#">Протеїни та ізоляти</a></li>
+          <li><a href="#">Бренди</a></li>
+          <li><a href="#">Акції</a></li>
+        </ul>
+      </div>
+    </nav>
 
-      <section class="page-intro" aria-labelledby="page-title">
-        <p class="eyebrow">Помічник із товару</p>
-        <h1 id="page-title">Запитайте про товар</h1>
-        <p>Знайдіть товар за артикулом, моделлю або SKU й поставте запитання про його картку.</p>
-      </section>
+    <!-- Store Main Content -->
+    <main class="store-main">
+      <div class="container">
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs" aria-label="Навігаційний ланцюжок">
+          <a href="#">Головна</a>
+          <span class="sep">/</span>
+          <a href="#">Спортивне харчування</a>
+          <span class="sep">/</span>
+          <a href="#">Вуглеводні напої</a>
+          <span class="sep">/</span>
+          <a href="#">Багатопорційні вуглеводні напої</a>
+          <span class="sep">/</span>
+          <span id="breadcrumb-product-name">Напій енергетичний SiS Go Energy (чорна смородина) 1,6 кг</span>
+        </nav>
 
-      <section class="lookup-panel" aria-labelledby="search-title">
-        <div class="lookup-heading">
-          <span class="step-number" aria-hidden="true">01</span>
-          <div>
-            <p class="eyebrow">Спочатку виберіть товар</p>
-            <h2 id="search-title">Знайдіть товар</h2>
+        <!-- Product Card Section (Exact Race Expert Product Page Layout) -->
+        <section class="product-page-section">
+          <!-- Left: Gallery -->
+          <div class="product-gallery-col">
+            <div class="main-image-frame">
+              <img id="main-product-img" src="static/images/RE0126.jpg" alt="Напій енергетичний SiS Go Energy" onerror="this.src='static/images/RE0126.jpg';">
+            </div>
+            <div class="gallery-thumbs">
+              <div class="thumb-item active">
+                <img src="static/images/RE0126.jpg" alt="SiS Go Energy фото 1">
+              </div>
+            </div>
+            <div class="gallery-disclaimer">Фото може відрізнятися від товару</div>
+          </div>
+
+          <!-- Right: Product Details & Purchase Form -->
+          <div class="product-info-col">
+            <h1 id="showcase-title" class="product-heading">Напій енергетичний SiS Go Energy (чорна смородина) 1,6 кг</h1>
+
+            <div class="product-rating-row">
+              <div class="stars-gold">★★★★★</div>
+              <span class="rating-link">Рейтинг 5.0</span>
+            </div>
+
+            <!-- Meta Attributes -->
+            <ul class="product-meta-list">
+              <li>
+                <span class="meta-label">Виробник:</span>
+                <span class="meta-value bold-brand">Science In Sport (SIS)</span>
+              </li>
+              <li>
+                <span class="meta-label">Артикул:</span>
+                <span class="meta-value bold-sku" id="showcase-sku">RE0126</span>
+              </li>
+              <li>
+                <span class="meta-label">Доступність:</span>
+                <span class="meta-value in-stock-green" id="showcase-stock-label">Є в наявності</span>
+              </li>
+            </ul>
+
+            <!-- Short Teaser Description -->
+            <div class="product-short-opis">
+              <p>SiS Go Energy — це енергетичний порошок, який забезпечує організм швидкими та тривалими вуглеводами для підтримки витривалості та енергії під час інтенсивних фізичних навантажень.</p>
+              <a href="#tab-desc" class="scroll-to-desc">До повного опису &darr;</a>
+            </div>
+
+            <!-- Flavor Variations -->
+            <div class="variation-box">
+              <div class="variation-label">Варіація смаку:</div>
+              <div class="variation-chips">
+                <button type="button" class="var-chip active" data-flavor="чорна смородина">
+                  <span class="dot-swatch swatch-currant"></span> чорна смородина
+                </button>
+                <button type="button" class="var-chip" data-flavor="лимонний">
+                  <span class="dot-swatch swatch-lemon"></span> лимонний
+                </button>
+                <button type="button" class="var-chip" data-flavor="апельсин">
+                  <span class="dot-swatch swatch-orange"></span> апельсин
+                </button>
+              </div>
+            </div>
+
+            <!-- Price Block -->
+            <div class="product-price-block">
+              <span id="showcase-price" class="re-price-val">2299</span>
+              <span class="re-price-curr">грн</span>
+            </div>
+
+            <!-- Purchase & AI Action Bar -->
+            <div class="product-purchase-row">
+              <!-- Quantity Spinner -->
+              <div class="qty-spinner">
+                <button type="button" class="qty-spinner-btn" id="qty-minus" aria-label="Зменшити кількість">-</button>
+                <input type="text" id="qty-val" value="1" readonly aria-label="Кількість">
+                <button type="button" class="qty-spinner-btn" id="qty-plus" aria-label="Збільшити кількість">+</button>
+              </div>
+
+              <!-- Main Buy Button (Race Expert Blue) -->
+              <button type="button" class="btn-re-primary" id="btn-main-buy">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                Купити
+              </button>
+
+              <button type="button" class="btn-re-outline" id="btn-one-click">
+                Купити в 1 клік
+              </button>
+
+              <!-- PROMINENT PILL BUTTON (Screenshot 1 Rozetka AI functionality in Race Expert style) -->
+              <button type="button" class="btn-race-expert-ai" id="btn-trigger-ai" title="Запитайте штучний інтелект про цей товар">
+                <span class="ai-sparkle-bubble">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF" />
+                  </svg>
+                </span>
+                <span class="ai-btn-text">Race Expert AI</span>
+              </button>
+            </div>
+
+            <!-- Guarantee & Shipping Perks -->
+            <div class="re-perks-row">
+              <div class="perk-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3960FF" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                <span>Відправка Новою Поштою по Україні</span>
+              </div>
+              <div class="perk-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3960FF" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>100% оригінальний сертифікований продукт</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Product Description & AI Consultation Tabs -->
+        <section class="product-tabs-section">
+          <div class="tabs-nav-bar">
+            <button type="button" class="tab-nav-btn active" data-tab="desc">Опис товару</button>
+            <button type="button" class="tab-nav-btn" data-tab="facts">Характеристики</button>
+            <button type="button" class="tab-nav-btn" data-tab="ai-help">Консультація Race Expert AI</button>
+          </div>
+
+          <div class="tab-pane active" id="tab-desc">
+            <div id="showcase-description" class="re-article-body">
+              <p>Завантаження офіційного опису товару з бази даних OpenCart...</p>
+            </div>
+          </div>
+
+          <div class="tab-pane" id="tab-facts" hidden>
+            <table class="re-specs-table">
+              <tbody>
+                <tr><th>Бренд:</th><td>Science In Sport (SIS)</td></tr>
+                <tr><th>Країна виробництва:</th><td>Велика Британія</td></tr>
+                <tr><th>Артикул:</th><td id="specs-sku">RE0126</td></tr>
+                <tr><th>Форма випуску:</th><td>Порошок для приготування енергетичного напою</td></tr>
+                <tr><th>Вага:</th><td>1.6 кг</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tab-pane" id="tab-ai-help" hidden>
+            <div class="re-ai-tab-box">
+              <div class="ai-box-icon">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF" />
+                </svg>
+              </div>
+              <div class="ai-box-info">
+                <h3>Потрібна точна порада щодо дозування чи поєднання?</h3>
+                <p>Штучний інтелект <strong>Race Expert AI</strong> перевіряє специфікації виробника, базу знань та дозволений allowlist для точних спортивних відповідей.</p>
+                <button type="button" class="btn-race-expert-ai" id="btn-tab-trigger-ai">
+                  <span class="ai-sparkle-bubble">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF" />
+                    </svg>
+                  </span>
+                  <span class="ai-btn-text">Відкрити помічник Race Expert AI</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Footer (Race Expert Authentic Style) -->
+    <footer class="re-footer">
+      <div class="container footer-inner">
+        <div class="footer-col-about">
+          <img src="static/images/re-logo.jpg" alt="Race Expert" class="footer-logo">
+          <p class="footer-slogan">Магазин спортивного харчування та добавок для професіоналів і любителів спорту.</p>
+        </div>
+        <div class="footer-col-contacts">
+          <h4>Контакти</h4>
+          <p>📞 <a href="tel:+380688234690">+380 (68) 823 46 90</a></p>
+          <p>✉️ <a href="mailto:info@raceexpert.com.ua">info@raceexpert.com.ua</a></p>
+          <p>🕒 Графік роботи: Пн-Сб 09:00 - 19:00</p>
+        </div>
+        <div class="footer-col-info">
+          <h4>Клієнтам</h4>
+          <ul>
+            <li><a href="#">Доставка і оплата</a></li>
+            <li><a href="#">Гарантія якості</a></li>
+            <li><a href="#">Політика конфіденційності</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="container">
+          <p>© 2026 Race Expert. Всі права захищені. Powered by Race Expert AI QA System.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Floating AI Pill Button (Always visible bottom-left) -->
+    <div class="floating-ai-pill-wrap">
+      <button type="button" class="btn-race-expert-ai btn-floating" id="btn-floating-ai" aria-label="Відкрити Race Expert AI">
+        <span class="ai-sparkle-bubble">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF" />
+          </svg>
+        </span>
+        <span class="ai-btn-text">Race Expert AI</span>
+      </button>
+    </div>
+
+    <!-- Backdrop Overlay -->
+    <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+    <!-- SIDE DRAWER (Left Offcanvas - Rozetka AI Functionality in Race Expert Design) -->
+    <aside id="ai-drawer" class="ai-drawer" aria-label="Race Expert AI Помічник" aria-hidden="true">
+      <!-- Drawer Header -->
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="ai-sparkle-bubble small">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF" />
+            </svg>
+          </span>
+          <span class="drawer-brand-title">Race Expert AI</span>
+          <span class="re-beta-badge">beta</span>
+        </div>
+
+        <div class="drawer-header-right">
+          <button type="button" class="drawer-close-btn" id="btn-drawer-close" aria-label="Закрити вікно">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Article Selector Bar (For Client Testing) -->
+      <div class="drawer-article-section">
+        <div class="article-input-label">Тестування товару за артикулом:</div>
+        <div class="article-input-row">
+          <input type="text" id="drawer-sku-input" placeholder="Введіть артикул (RE0126)..." autocomplete="off" value="RE0126">
+          <button type="button" id="btn-load-sku" class="btn-sku-search">Знайти</button>
+        </div>
+        <div class="quick-article-chips">
+          <button type="button" class="art-chip active" data-article="RE0126">RE0126 (SiS 1.6 кг)</button>
+          <button type="button" class="art-chip" data-article="RE1050">RE1050 (Електроліти)</button>
+          <button type="button" class="art-chip" data-article="RE0518">RE0518 (Гель + Кофеїн)</button>
+          <button type="button" class="art-chip" data-article="RE0508">RE0508 (Креатин)</button>
+          <button type="button" class="art-chip" data-article="RE0537">RE0537 (Ізолят Whey)</button>
+          <button type="button" class="art-chip" data-article="RE0731">RE0731 (Шейкер 500 мл)</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Drawer Body -->
+      <div class="drawer-body" id="drawer-body">
+        <!-- Selected Product Mini Card (Race Expert Clean Style) -->
+        <div class="drawer-product-preview-card" id="drawer-product-card">
+          <div class="mini-card-thumb">
+            <img id="drawer-product-img" src="static/images/RE0126.jpg" alt="Обраний товар">
+          </div>
+          <div class="mini-card-content">
+            <h4 id="drawer-product-title" class="mini-card-title">Напій енергетичний SiS Go Energy (чорна смородина) 1,6 кг</h4>
+            <div class="mini-card-meta">
+              <span class="mini-stars">★★★★★</span>
+              <span class="mini-reviews">(5.0)</span>
+            </div>
+            <div class="mini-price-row">
+              <span class="mini-price" id="drawer-product-price">2299 грн</span>
+              <span class="mini-stock" id="drawer-stock-badge">Є в наявності</span>
+            </div>
           </div>
         </div>
-        <form id="search-form">
-          <label for="article-input">Артикул, модель або SKU</label>
-          <div class="input-row">
+
+        <!-- Quick Action Buttons -->
+        <div class="mini-card-actions">
+          <button type="button" class="action-chip" id="chip-show-desc">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            Опис товару
+          </button>
+          <button type="button" class="action-chip" id="chip-show-facts">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            Характеристики
+          </button>
+          <button type="button" class="action-chip" id="chip-clear-chat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            Очистити чат
+          </button>
+        </div>
+
+        <!-- Suggested Pre-set Questions (Screenshot 2 Rozetka AI Functional Style in Race Expert Design) -->
+        <div class="suggested-questions-wrap">
+          <div class="suggested-heading">Швидкі запитання про товар:</div>
+          <div class="suggested-chips-flow" id="suggested-chips-flow">
+            <button type="button" class="prompt-chip" data-question="Скільки мірних ложок або грамів розчиняти на флягу 500–750 мл?">
+              Скільки мірних ложок або грамів розчиняти на флягу 500–750 мл?
+            </button>
+            <button type="button" class="prompt-chip" data-question="Як правильно пити напій під час бігу або велотренування?">
+              Як правильно пити напій під час бігу або велотренування?
+            </button>
+            <button type="button" class="prompt-chip" data-question="Чи доречно випити його на фініші для швидкого відновлення глікогену?">
+              Чи доречно випити його на фініші для швидкого відновлення глікогену?
+            </button>
+            <button type="button" class="prompt-chip" data-question="Скільки калорій і вуглеводів у готовій порції?">
+              Скільки калорій і вуглеводів у готовій порції?
+            </button>
+            <button type="button" class="prompt-chip" data-question="Чи підходить цей напій для інтенсивних занять боротьбою чи в залі?">
+              Чи підходить цей напій для інтенсивних занять боротьбою чи в залі?
+            </button>
+            <button type="button" class="prompt-chip" data-question="Який строк придатності готового напою у флязі?">
+              Який строк придатності готового напою у флязі?
+            </button>
+          </div>
+        </div>
+
+        <!-- Conversation Stream Container -->
+        <div class="chat-messages-container" id="chat-messages">
+          <!-- Initial AI Welcome Message -->
+          <div class="message-bubble assistant-bubble">
+            <div class="bubble-avatar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF" />
+              </svg>
+            </div>
+            <div class="bubble-content">
+              <div class="bubble-text">
+                Вітаю! Я <strong>Race Expert AI</strong> — спортивний консультант. Запитайте мене про точний склад, спосіб приготування, дозування або сумісність обраного товару.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator-row" id="typing-indicator" hidden>
+          <div class="bubble-avatar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="#3960FF" />
+            </svg>
+          </div>
+          <div class="typing-bubble typing-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="typing-status-text">Готуємо відповідь про вибраний товар…</span>
+          </div>
+        </div>
+
+        <!-- Disclaimer & Feedback -->
+        <div class="drawer-disclaimer-row">
+          <div class="feedback-actions">
+            <button type="button" class="thumb-btn" title="Корисна відповідь">👍</button>
+            <button type="button" class="thumb-btn" title="Не зовсім точна відповідь">👎</button>
+          </div>
+          <span class="disclaimer-text">Відповідь буде українською. Race Expert AI може помилятися.</span>
+        </div>
+      </div>
+
+      <!-- Sticky Bottom Composer Form (Rozetka Functional Style) -->
+      <div class="drawer-composer">
+        <form id="chat-composer-form" class="composer-form">
+          <div class="composer-pill-input">
             <input
-              id="article-input"
-              name="article"
+              type="text"
+              id="composer-user-input"
+              placeholder="Запитайте в Race Expert AI…"
               autocomplete="off"
-              placeholder="Наприклад, RE0126"
+              maxlength="1000"
               required
             >
-            <button id="search-button" class="button button-primary" type="submit">
-              Знайти товар
-              <span aria-hidden="true">→</span>
+            <button type="submit" id="btn-composer-send" class="composer-send-btn" aria-label="Надіслати запитання">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
             </button>
           </div>
         </form>
-        <p class="field-hint">Пошук виконується за точним збігом у каталозі.</p>
-        <p id="search-message" class="message" role="status" aria-live="polite"></p>
-        <div id="candidate-list" class="candidate-list" aria-label="Знайдені товари" hidden></div>
-      </section>
-
-      <section id="product-panel" class="qa-layout" aria-label="Запитання про вибраний товар" hidden>
-        <article class="product-card" aria-labelledby="product-title">
-          <div class="product-card-top">
-            <p class="eyebrow">Поточний товар</p>
-            <span id="product-stock" class="stock-label" hidden></span>
-          </div>
-          <div class="product-identity">
-            <div class="product-mark" aria-hidden="true">RE</div>
-            <div class="product-title-wrap">
-              <p id="product-code" class="product-code"></p>
-              <h2 id="product-title">Картка товару</h2>
-            </div>
-          </div>
-          <p id="product-description" class="product-description" hidden></p>
-          <section id="product-facts" class="product-facts" aria-labelledby="facts-title" hidden>
-            <h3 id="facts-title">Характеристики з картки</h3>
-            <dl id="product-attributes" class="attributes"></dl>
-          </section>
-          <div class="verified-note">
-            <span class="verified-mark" aria-hidden="true">✓</span>
-            <p>Картка повторно перевіряється перед відповіддю.</p>
-          </div>
-        </article>
-
-        <section id="question-panel" class="assistant-panel" aria-labelledby="question-title">
-          <div class="assistant-kicker">
-            <span class="assistant-mark" aria-hidden="true">✦</span>
-            <span>Помічник із товару</span>
-            <span class="context-label">Перевірені дані про товар</span>
-          </div>
-          <h2 id="question-title">Запитайте штучний інтелект про цей товар</h2>
-          <p class="assistant-intro">Помічник використовує дані вибраного товару й за потреби шукає підтвердження виробника або схваленого постачальника.</p>
-
-          <div class="question-suggestions" aria-label="Приклади запитань">
-            <span class="suggestions-label">Можна запитати</span>
-            <button class="suggestion-chip" type="button">Як його вживати?</button>
-            <button class="suggestion-chip" type="button">Який склад продукту?</button>
-            <button class="suggestion-chip" type="button">Що вказано про порцію?</button>
-          </div>
-
-          <form id="question-form">
-            <label for="question-input">Ваше запитання</label>
-            <div class="textarea-wrap">
-              <textarea
-                id="question-input"
-                rows="4"
-                maxlength="2000"
-                placeholder="Напишіть запитання про вибраний товар…"
-                required
-                disabled
-              ></textarea>
-              <div class="textarea-meta">
-                <span>Відповідь буде українською</span>
-                <span id="question-counter">0 / 2000</span>
-              </div>
-            </div>
-            <div class="question-actions">
-              <p id="question-message" class="message" role="status" aria-live="polite"></p>
-              <button id="ask-button" class="button button-primary" type="submit" disabled>
-                Надіслати запитання
-                <span aria-hidden="true">→</span>
-              </button>
-            </div>
-          </form>
-          <div id="typing-indicator" class="typing-indicator" role="status" aria-live="polite" aria-atomic="true" hidden>
-            <span>Помічник формує відповідь</span>
-            <span class="typing-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-          </div>
-          <article id="latest-answer" class="answer" aria-live="polite" hidden></article>
-        </section>
-      </section>
-    </main>
+      </div>
+    </aside>
   </body>
 </html>

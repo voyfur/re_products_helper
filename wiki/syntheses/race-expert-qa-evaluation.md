@@ -3,10 +3,10 @@ schema_version: 2
 id: "synthesis.race-expert-qa-evaluation"
 type: "synthesis"
 title: "Оценка Q&A помощника Race Expert"
-description: "История оценок и offline-проверок Product QA; prompt v18 активен, контрактные regression тесты не являются новой оценкой качества модели."
+description: "История проверок ответов по карточке; v17 остаётся активным до реализации утверждённого prompt v18 и памяти диалога."
 tags: ["project:race-expert", "capability:product-qa", "workflow:testing", "topic:llm-evaluation"]
 source: {"raw_path": "raw/sources/qa-evaluation-source-migration-2026-11-18.md"}
-dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-23T11:34:00+02:00"}
+dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-21T22:12:00+02:00"}
 relations: [{"type": "supports", "target": "project.race-expert-qa"}, {"type": "references", "target": "synthesis.race-expert-qa-web-search"}]
 aliases: ["Race Expert Q&A evaluation", "Оценка ответов помощника"]
 status: "active"
@@ -16,7 +16,7 @@ status: "active"
 
 ## Активный prompt
 
-Активен [prompts/product-assistant-system-v18.md](../../prompts/product-assistant-system-v18.md) (SHA-256 `87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f`). Он сохраняет fail-closed релевантность вопроса, фиксированный отказ для личных health/dose сценариев и проверку `verified_product_name`. Если точный источник подтверждает общее применение для активных спортсменов или после тренировки, но не специальное применение в указанном спорте, ответ сочетает полезный общий вывод с аккуратным ограничением. Общие заявления не доказывают личную безопасность, дозировку или эффект. Временная история до девяти прошлых `user`/`assistant` реплик передаётся только как недоверенный контекст.
+Активен [prompts/product-assistant-system-v17.md](../../prompts/product-assistant-system-v17.md). Он сохраняет fail-closed релевантность вопроса, фиксированный ответ для явно личных health/dose сценариев и проверку `verified_product_name`; вопросы о спортивной пригодности запускают точный `product_facts` поиск, а подтверждённое производителем общее спортивное применение позволяет дать прямой ответ и для пловца. Prompt запрещает выдавать общий вывод за специальное подтверждение для плавания, упоминать внутреннюю карточку и добавлять наличие, если о нём не спросили.
 
 Prompt v12 сохранён без изменений; его SHA-256:
 
@@ -32,9 +32,7 @@ SHA-256 v16: `2789348950c64432833f678cd1b83db06fc46f5363e40a7356d83f43bf35c876`.
 
 SHA-256 v17: `f26e6eabf5d2867adf5608843abb1da277c362759cd3606d892c3c101e9fcdea`.
 
-SHA-256 v18: `87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f`.
-
-Утверждённые [спецификация сбалансированного спортивного ответа и памяти диалога](../../docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md) и [план реализации v18](../../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md) выполнены в локальном checkout. Prompt v17 и его pin остались неизменными. Последующий [план stream API и typing](../../docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md) добавил offline-проверки потокового контракта и UI; полный suite прошёл: 216 tests и 4009 subtests. Это проверки реализации, не новая live или blind оценка качества модели.
+Для следующего изменения утверждены [спецификация сбалансированного спортивного ответа и памяти диалога](../../docs/superpowers/specs/2026-11-21-product-answer-balanced-sports-suitability-design.md) и [план реализации v18](../../docs/superpowers/plans/2026-11-21-product-qa-sports-suitability-and-memory.md). До завершения реализации активным остаётся v17; prompt v18 ещё не создан, не закреплён и не включён.
 
 Он требует отвечать только на украинском независимо от языка вопроса. Если факта нет в контексте, ответ должен сообщить об этом; при конфликте модель должна назвать оба значения и не выбирать одно наугад. Prompt v11 и ранние версии сохранены как история.
 
@@ -60,4 +58,4 @@ SHA-256 v18: `87b639cc74aadf2a387e612bf5d1cda767b488e8477d1d442198bff58795ce1f`.
 
 Для Web Search подготовлены [спецификация](../../docs/superpowers/specs/2026-11-19-product-qa-web-search-design.md), [API-контракт](../../docs/api/product-qa-v1.yaml) и [исследование источников](../../docs/superpowers/research/2026-11-19-raceexpert-web-search-domain-research.md). В live E2E [50 товаров × 10 вопросов](../../docs/test-harness/qa-live-50-products-500-questions-2026-11-20.md) итоговые 500 сценариев завершились успешно; prompt v14 добавил fail-closed scope, фиксированный отказ на личные health-вопросы и проверенное имя товара. Live UI check на v16 подтвердил запуск Tavily, но финальный ответ остался слишком осторожным. После обновления v17 выполнен один bounded live UI E2E: Tavily использован, точный источник принят, OpenAI успешно ответил прямым общим выводом о спортивном применении без заявления о специальной формуле для плавцов. Offline regression и mock container smoke также прошли.
 
-Для v18 реализовано правило давать одновременно общий полезный вывод о спортивном применении и границу по конкретному виду спорта, когда exact-product источник подтверждает первое, но не второе. Временная история ограничена девятью предыдущими `user`/`assistant` сообщениями плюс текущим вопросом, относится к тому же товару, сбрасывается в UI при новом поиске или перезагрузке и не сохраняется. Стриминг добавляет `POST /api/v1/ask/stream` с SSE-событиями и локальный typing-индикатор; `POST /api/v1/ask` остаётся совместимым JSON endpoint. На 23 ноября focused suite: 97 passed; полный offline suite: 216 passed и 4009 subtests. Browser preview и container smoke использовали синтетические зависимости и не обращались к OpenAI/Tavily. Эти цифры относятся к проверкам реализации, а не к новой оценке live-ответов модели.
+Для v18 утверждено правило давать одновременно общий полезный вывод о спортивном применении и границу по конкретному виду спорта, когда exact-product источник подтверждает первое, но не второе. План также вводит временную память: до девяти предыдущих `user`/`assistant` сообщений плюс текущий вопрос, только для того же товара, с очисткой при смене товара или перезагрузке. Это запланированная работа; до её завершения активен v17.
