@@ -2,20 +2,22 @@
 
 ## Active Context
 
-- Last session: `raw/sessions/2026-11-23-deploy-rozetka-ai-style-demo-with-sports-skills-.md`
-- Current objective: Deploy Rozetka-AI style demo with sports skills, intent classifier, and 24-category questions matrix
+- Last session: `raw/sessions/2026-11-23-qa-e2e-benchmarks-developer-docs-and-github-release.md`
+- Current objective: Comprehensive Code Review, 100 Live E2E tests, Dialogue Cost Profiling, Full Ukrainian Developer Docs, and GitHub release
 
 ## Current Decisions
 
-- Впроваджено UI у функціональному стилі Rozetka AI з брендуванням Race Expert: плаваюча кнопка Race Expert AI, бічна шторка з карткою товару, ціною, наявністю та вибором артикулу.
-- Активовано prompt v18 та модуль Intent Classifier (app/intent_classifier.py): 4 доменні модулі знань (Endurance, Supplements, Combat/Gym, General) динамічно збагачують системний промпт.
-- Виправлено таймінг та усунено роботизовані відмови: консультант підтримує логіку бігуна, пояснює питний режим на дистанції (100–150 мл кожні 15–20 хв) та підтверджує прийом на фініші для швидкого відновлення глікогену.
-- Реалізовано ієрархічну матрицю швидких запитань (app/suggested_questions.py): 24 групи/підгрупи (100% каталогу OpenCart), рівно по 6 найчастіших запитань для кожної групи (144 запитання). Питання підтягуються динамічно через /api/search та оновлюються на фронтенді.
-- Розгорнуто оновлений Docker-образ на VPS: перевірено автоматичним browser-агентом та live API на https://n8n.raceexpert-tools.net.ua/re-products-demo/.
+- Проведено комплексне code review та успішно виконано 100 live E2E тестів до реальної бази OpenCart MySQL через SSH-тунель (100% успішність, середня латентність знизилася з 5.50 с до 3.99 с, прискорення на 27%).
+- Проведено точне вимірювання витрат токенів та вартості діалогу від 1-го до 10-го повідомлення: завдяки OpenAI Prompt Caching повний діалог з 10 реплік коштує лише $0.00739 на gpt-4o-mini (менше 1 цента за всю розмову), а середнє повідомлення — $0.00074 (~0.03 грн).
+- Усунуто скаргу замовника (роботизовану відмову щодо вживання напою на фініші 60-хвилинного бігу): Prompt v18 + Intent Classifier дають природну та кваліфіковану відповідь спортивного нутриціолога.
+- Реалізовано окремий ендпоінт `GET /api/v1/products/{article}/suggested-questions` для швидкого отримання 6 цільових запитань за артикулом (покрито unit-тестами, 174 тести пройдені).
+- Повністю оновлено документацію для програміста українською мовою в `README.md` та `docs/api/product-qa-integration.md` (всі ендпоінти, SSE стрімінг, typing-індикатор, матриця 24 категорій, Nginx config, рекомендації по кнопці та шторці Rozetka AI, готові приклади PHP/JS/CSS).
+- Створено автономний тестовий стенд `docs/api/test-widget-demo.html` для швидкого тестування в браузері.
+- Усі зміни закомічено та опубліковано на GitHub у відокремленій гілці `codex/product-qa-v18` (`voyfur/re_qa` та `voyfur/re_products_helper`).
 
 ## Open Tasks
 
-- Зібрати додатковий зворотний зв'язок від замовника після тестування оновленого функціоналу.
+- Передати frontend/backend розробнику сайту посилання на оновлений `README.md` та тестову сторінку `docs/api/test-widget-demo.html` для інтеграції віджета в OpenCart.
 
 ## Blockers
 
@@ -23,7 +25,7 @@
 
 ## Next Action
 
-- Надати клієнту публічне посилання на перевірене live demo: https://n8n.raceexpert-tools.net.ua/re-products-demo/.
+- Повідомити замовника про готовність повної документації та тестового демо для передачі програмісту.
 
 ## Relevant Pages
 
