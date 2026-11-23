@@ -200,3 +200,9 @@
 - Raw: `raw/sessions/2026-11-23-publish-product-qa-streaming-handoff.md`
 - Tags: `activity:documentation`, `status:completed`, `project:race-expert`, `task:product-qa-handoff`, `component:product-qa-api`, `topic:github-handoff`, `file:docs/superpowers/plans/2026-11-23-product-qa-streaming-and-typing.md`, `file:wiki/sources/race-expert-qa-project.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/session-handoff.md`, `file:wiki/log.md`
 - Status: `completed`
+
+## [2026-11-23] session | Record Product QA implementation and GitHub handoff in Wiki
+
+- Raw: `raw/sessions/2026-11-23-record-product-qa-implementation-and-github-hand.md`
+- Tags: `activity:documentation`, `status:completed`, `project:race-expert`, `task:product-qa-handoff-memory`, `component:product-qa-api`, `topic:streaming`, `topic:production-readiness`, `topic:github-handoff`, `file:wiki/index.md`, `file:wiki/sources/race-expert-qa-project.md`, `file:wiki/syntheses/race-expert-qa-production-readiness.md`, `file:wiki/content-index.jsonl`, `file:wiki/session-handoff.md`, `file:wiki/log.md`
+- Status: `completed`

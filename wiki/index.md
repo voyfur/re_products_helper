@@ -8,6 +8,7 @@
 - [Q&A-проект](sources/race-expert-qa-project.md) — назначение, поток данных и ограничения.
 - [Web Search и API](syntheses/race-expert-qa-web-search.md) — текущая реализация backend, границы источников и открытые решения.
 - [Production readiness](syntheses/race-expert-qa-production-readiness.md) — проверенные результаты и блокеры перед production; содержит копируемое сообщение следующему чату.
+- [GitHub handoff `voyfur/re_qa`](https://github.com/voyfur/re_qa) — приватный curated Product QA backend handoff; актуальный commit и проверки записаны в production-readiness synthesis.
 - [Production blueprint](../docs/deployment/product-qa-production-blueprint.md) — предложенные VPS, reverse proxy, MySQL TLS, storage и acceptance gates.
 - [VPS install runbook](../docs/deployment/product-qa-vps-runbook.md) — пошаговый handoff для установки сервиса и подключения endpoint через HTTPS сайта без отдельной DNS-записи.
 - [MySQL-доступ и схема Q&A](sources/qa-mysql-readonly-access-and-product-query.md) — пять таблиц, права, SSH-маршрут и локальные настройки.

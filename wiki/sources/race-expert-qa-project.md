@@ -6,7 +6,7 @@ title: "Race Expert — вопросы и ответы о товаре"
 description: "Отдельное приложение Q&A по выбранному товару; prompt v18 активен, API поддерживает JSON и SSE POST, локальный UI показывает потоковый ответ с typing-индикатором."
 tags: ["project:race-expert", "domain:ecommerce", "capability:product-qa", "capability:web-search", "workflow:implementation", "topic:product-data"]
 source: {"raw_path": "raw/sources/qa-project-scope-and-transfer-2026-11-18.md"}
-dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-23T12:10:00+02:00"}
+dates: {"added_at": "2026-11-18T19:28:00+02:00", "updated_at": "2026-11-23T12:35:00+02:00"}
 relations: [{"type": "references", "target": "synthesis.race-expert-qa-evaluation"}, {"type": "references", "target": "source.race-expert-qa-mysql-access"}, {"type": "references", "target": "synthesis.race-expert-qa-web-search"}]
 aliases: ["Race Expert Q&A", "Помощник по вопросам о товаре"]
 status: "active"
@@ -57,12 +57,23 @@ Offline-набор и mock container smoke v18 пройдены; 21.11 выпо�
 
 Приватный handoff-репозиторий `voyfur/re_qa` содержит проверенный набор кода и документов для интеграции. Он не включает Wiki, raw-сессии/источники или eval-архивы. Публикация кода не означает подключение backend сайта или VPS deployment.
 
+## Итог реализации и GitHub handoff
+
+- Handoff опубликован в приватном [GitHub-репозитории Product QA](https://github.com/voyfur/re_qa), ветка `main`; проверенный публикационный commit — [`9f07b79`](https://github.com/voyfur/re_qa/commit/9f07b79a7a050a849bdbf94ccd88ba79b6e62daf). В curated snapshot 54 runtime, prompt, test, deployment и integration-файла; Wiki, raw-сессии/источники и eval-архивы в него не включены.
+- Локальная рабочая копия: `/Users/anatoly/Workspace/03_Business/WORK/Race Expert/QA/.codex-checkouts/product-qa-v18`, ветка `codex/product-qa-v18`, последний локальный commit `cd04950`.
+- Сохранён JSON `POST /api/v1/ask`; добавлен SSE `POST /api/v1/ask/stream` с событиями `start`, `delta`, `replace`, `done`, `error`. Для сайта это контракт server-to-server API: backend сайта хранит bearer key и проксирует stream без buffering. Typing-индикатор отображает сайт; в локальном QA UI он уже проверен.
+- Локальный UI держит скрытую временную историю в памяти страницы: до девяти предыдущих сообщений плюс текущий вопрос; сброс при смене товара или перезагрузке. API `history` необязателен, контекст недоверенный, не сохраняется и не логируется отдельно. Тело ограничено 16 KiB; удаляются самые старые целые реплики, текущий вопрос не сокращается.
+- Активен prompt v18: при подтверждённом общем применении для активных спортсменов/после тренировки даёт полезный общий вывод и отдельно ограничивает вывод по названному спорту, когда специальное применение не подтверждено. Сохраняются fixed refusal для personal-health/dose вопросов без дозировки и учёт релевантного предыдущего health-контекста. v17 оставлен неизменным.
+- Обновлены API/OpenAPI, локальный UI, `AGENTS.md`, README, интеграционные/deployment docs, prompt/hash loader, журнал, Dockerfile, Nginx handoff и container smoke.
+- Финальная проверка: focused pytest — 98 passed; полный offline pytest — 216 passed и 4009 subtests; Docker image собран offline, in-container smoke с `--network none` прошёл (`/health`, `/ready`, JSON ask и SSE ask — 200); `node --check`, hash checks и Wiki lint прошли.
+- Backend готов для передачи программисту. Backend сайта и storefront ещё не подключены. VPS/staging/production deployment и платные live OpenAI/Tavily вызовы не выполнялись.
+
 ## Существующий общий staging
 
 В общем test harness Q&A prompt v12 развёрнут 16.11.2026; последняя запись статуса на 17.11 указывает общий image product-overview-v4. Этот стенд не является отдельным QA-проектом из этой папки. Его URL: https://n8n.raceexpert-tools.net.ua/re-products-demo/. Basic Auth отключён по запросу пользователя, а лимита GPT-запросов нет; вызовы могут создавать расходы. После выкладки v12 live-вызов Q&A не выполнялся. Не отправляй запросы и не развёртывай код туда без отдельного задания. См. [границу staging](../../raw/sources/qa-staging-boundary-2026-11-18.md).
 
 ## Статус
 
-Отдельная локальная копия Q&A создана 18.11.2026. QA-only `.env`, защищённые секреты и Q&A-only SSH-запускатель настроены; значения секретов в Wiki не записываются. Локальная сессия v17 прошла через одобренный tunnel, но не подключала storefront, staging или production. Перед публикацией нужны целевая архитектура VPS, проверенная идентичность базы, пользователь с минимальными grants и ограничения доступа/расходов.
+Отдельная локальная копия Q&A создана 18.11.2026. QA-only `.env`, защищённые секреты и Q&A-only SSH-запускатель настроены; значения секретов в Wiki не записываются. Handoff backend v18 опубликован в `voyfur/re_qa` и сохранён в локальной ветке по пути выше. Storefront не подключён. Перед production нужны целевая архитектура VPS, проверенная идентичность базы, пользователь с минимальными grants, MySQL TLS с CA/hostname verification, reverse proxy, постоянное хранилище журнала, backup/restore и acceptance.
 
 Для технической оценки см. [сводку Q&A](../syntheses/race-expert-qa-evaluation.md).
