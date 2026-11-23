@@ -460,6 +460,56 @@ def create_app(
         )
         return _sse_response(events)
 
+    @app.get(
+        "/api/v1/products/{article}/suggested-questions",
+        include_in_schema=False,
+    )
+    def get_suggested_questions_v1(
+        article: str,
+        credentials: HTTPAuthorizationCredentials | None = Depends(_PRODUCT_QA_BEARER),
+    ) -> JSONResponse:
+        configured_key = get_runtime_settings().integration_api_key
+        if configured_key:
+            if (
+                credentials is None
+                or credentials.scheme.casefold() != "bearer"
+                or not credentials.credentials
+                or not hmac.compare_digest(credentials.credentials, configured_key)
+            ):
+                return JSONResponse(
+                    {"error": "unauthorized"},
+                    status_code=401,
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        clean_article = article.strip()
+        if not clean_article:
+            return JSONResponse({"error": "invalid_request"}, status_code=422)
+        try:
+            active = get_services()
+            with active["catalog"].connection_scope() as connection:
+                products = active["catalog"].search_products(
+                    clean_article, connection=connection
+                )
+        except Exception as error:
+            _log_catalog_unavailable(error)
+            return JSONResponse({"error": "catalog_unavailable"}, status_code=503)
+        if not products:
+            return JSONResponse({"error": "product_not_found"}, status_code=404)
+        if len(products) != 1:
+            return JSONResponse({"error": "product_selection_required"}, status_code=409)
+
+        product = products[0]
+        uk_card = product.languages.get("uk") or product.languages.get("ru")
+        name = uk_card.name if uk_card else (product.model or product.article)
+        return JSONResponse(
+            {
+                "status": "succeeded",
+                "article": product.article,
+                "product_name": name,
+                "suggested_questions": get_suggested_questions(product),
+            }
+        )
+
     return app
 
 

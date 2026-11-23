@@ -523,3 +523,30 @@ def test_active_prompt_matches_pinned_hash():
     prompt = load_system_prompt()
     assert "Всегда отвечай только на украинском языке" in prompt
     assert "Не добавляй факты из памяти, истории разговора" in prompt
+
+
+def test_get_suggested_questions_v1(harness, tmp_path):
+    client = _versioned_client(harness, tmp_path)
+    res = client.get(
+        "/api/v1/products/RE0731/suggested-questions",
+        headers={"Authorization": "Bearer synthetic-site-key"},
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "succeeded"
+    assert data["article"] == "RE0731"
+    assert len(data["suggested_questions"]) == 6
+
+    res404 = client.get(
+        "/api/v1/products/UNKNOWN_SKU/suggested-questions",
+        headers={"Authorization": "Bearer synthetic-site-key"},
+    )
+    assert res404.status_code == 404
+    assert res404.json() == {"error": "product_not_found"}
+
+    res401 = client.get(
+        "/api/v1/products/RE0731/suggested-questions",
+        headers={"Authorization": "Bearer wrong-key"},
+    )
+    assert res401.status_code == 401
+    assert res401.json() == {"error": "unauthorized"}

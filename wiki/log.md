@@ -181,3 +181,16 @@
 - Raw: `raw/sessions/2026-11-23-deploy-rozetka-ai-style-demo-with-sports-skills-.md`
 - Tags: `activity:implementation`, `status:completed`, `project:race-expert`, `task:rozetka-ai-demo-and-sports-skills`, `topic:ui-redesign`, `topic:intent-classifier`, `topic:sports-nutrition`, `topic:suggested-questions`, `topic:vps-deployment`, `file:app/intent_classifier.py`, `file:app/suggested_questions.py`, `file:app/main.py`, `file:app/static/app.js`, `file:app/templates/index.html`
 - Status: `completed`
+
+## [2026-11-23] session | Comprehensive Code Review, 100 Live E2E OpenCart tests, and 1-to-10 Turn Dialogue Cost Profiling
+
+- Tags: `activity:testing`, `status:completed`, `project:race-expert`, `task:qa-code-review-100-live-tests-and-dialogue-cost`, `topic:code-review`, `topic:e2e-testing`, `topic:cost-profiling`, `topic:prompt-caching`, `file:app/intent_classifier.py`, `file:app/suggested_questions.py`, `file:app/assistant.py`, `file:app/main.py`, `file:app/catalog.py`
+- Status: `completed`
+- Description: Проведено комплексное код-ревью архитектуры системы (Intent Classifier, Suggested Questions Matrix, Security fast-path filters, read-only DB catalog, prompt caching). Выполнено 100 реальных E2E тестов с живыми запросами к MySQL OpenCart через SSH-туннель (100% успех, средняя латентность снизилась до 3.99 с vs 5.50 с в v17). Проведено точное профилирование стоимости диалога от 1-го до 10-го сообщения на базе OpenAI Prompt Caching: весь диалог из 10 сообщений обходится всего в $0.00739 на gpt-4o-mini (~0.31 грн), а в среднем одно сообщение стоит $0.00074. Решена проблема клиента из скриншота (снят роботизированный отказ на употребление изотоника на 60-й минуте финиша). Полный отчёт сохранён в артефактах.
+
+## [2026-11-23] session | Complete Developer Integration Documentation, Suggested Questions Endpoint & Test Widget Demo
+
+- Tags: `activity:documentation`, `status:completed`, `project:race-expert`, `task:developer-integration-docs-and-test-demo`, `topic:developer-docs`, `topic:api-specification`, `topic:streaming-sse`, `topic:typing-indicator`, `topic:suggested-questions`, `topic:widget-ui`, `file:docs/api/product-qa-integration.md`, `file:docs/api/test-widget-demo.html`, `file:app/main.py`, `file:tests/test_qa_app.py`
+- Status: `completed`
+- Description: Добавлен новый ендпоинт GET /api/v1/products/{article}/suggested-questions для прямого получения 6 категоризированных вопросов по артикулу (покрыт тестами в test_qa_app.py, 178 тестов успешно). Полностью обновлена официальная документация для программиста docs/api/product-qa-integration.md на украинском языке со всеми спецификациями (SSE streaming, sync JSON ask, suggested questions, health/ready, typing indicator lifecycle, 24-category chips matrix, Nginx SSE buffering config, рекомендации по кнопке и виезжающей шторке в стиле Rozetka AI, готовые PHP/JS/CSS примеры). Создана автономная тестовая страница docs/api/test-widget-demo.html для браузерного тестирования.
+
